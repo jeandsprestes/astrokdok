@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0e0e0e">
+<title>Astrokdok</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="hud"></div>
+  <div id="screen"><canvas id="c" width="160" height="144"></canvas><div id="fade"></div></div>
+  <div id="panel">
+    <div id="box" hidden><div id="boxText"></div><div id="boxMore">▼</div></div>
+    <div id="ui" hidden></div>
+    <div id="pad">
+      <div id="dpad"><i class="v"></i><i class="h"></i><b class="u">▲</b><b class="d">▼</b><b class="l">◀</b><b class="r">▶</b></div>
+      <div class="ab"><button data-k="b" class="b">B</button><button data-k="a" class="a">A</button></div>
+    </div>
+  </div>
+</div>
+<script src="js/engine.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/world.js"></script>
+<script src="js/lesson.js"></script>
+<script src="js/content1.js"></script>
+<script src="js/content2.js"></script>
+<script src="js/content3.js"></script>
+<script src="js/game-launch.js"></script>
+<script src="js/game-lander.js"></script>
+<script src="js/game-sun.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/flow.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
