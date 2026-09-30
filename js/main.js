@@ -1,5 +1,5 @@
 'use strict';
-// Tela de título, introdução e início.
+// Tela de título, escolha do nome, introdução e início.
 A.titleScene = () => {
   const st = A.stars(60);
   let t = 0;
@@ -25,15 +25,17 @@ const waitStart = () => new Promise(r => {
   scr.onclick = go;
 });
 
-const askRival = () => new Promise(res => {
-  const u = A.ui(`<span class="tag">CADASTRO DE CADETE</span><p class="q">Todo cadete tem um RIVAL: aquele colega metido que acha que sabe tudo.</p><p>Qual é o nome do seu rival?</p>
-    <input class="name" id="rv" maxlength="10" value="OTÁVIO" autocomplete="off"><button class="btn" id="ok">ESSE MESMO ▶</button>`);
-  u.querySelector('#ok').onclick = () => {
-    const v = u.querySelector('#rv').value.replace(/[^\p{L}\p{N} ]/gu, '').trim().toUpperCase();
-    A.S.rival = v || 'OTÁVIO';
-    A.sfx('ok'); A.uiClose(); res();
-  };
+const clean = v => v.replace(/[^\p{L}\p{N} ]/gu, '').trim().toUpperCase();
+const askText = (tag, html, def) => new Promise(res => {
+  const u = A.ui(`<span class="tag">${tag}</span>${html}<input class="name" id="tx" maxlength="10" value="${def}" autocomplete="off"><button class="btn" id="ok">ESSE MESMO ▶</button>`);
+  const inp = u.querySelector('#tx');
+  inp.onfocus = () => inp.select();
+  u.querySelector('#ok').onclick = () => { const v = clean(inp.value); A.sfx('ok'); A.uiClose(); res(v || def); };
 });
+A.askName = async () => {
+  A.S.nome = await askText('CADASTRO DE CADETE', '<p class="q">Bem-vindo à Astrokdok!</p><p>Qual é o seu nome, cadete?</p>', A.S.nome || 'GABRIEL');
+  A.save();
+};
 
 A.intro = async () => {
   const st = A.stars(70);
@@ -47,18 +49,20 @@ A.intro = async () => {
   } });
   A.hud('VALE DO CAPÃO', '');
   await A.fade(0);
+  await A.askName();
   await A.say([
     'Vale do Capão, Bahia. Uma noite cheia de estrelas.',
-    'Gabriel Rosa, 10 anos, encontra uma carta embaixo da porta. O envelope é amarelo e preto...',
+    '{nome} encontra uma carta embaixo da porta. O envelope é amarelo e preto...',
     '"Parabéns! Você foi aceito como CADETE da ASTROKDOK, a empresa de viagens espaciais."',
-    '"Apresente-se amanhã na base. Traga curiosidade. O resto a gente ensina."',
+    '"Você vai estudar na Escola Municipal do Capão e voar com a gente. Traga curiosidade. O resto a gente ensina."',
   ]);
-  await askRival();
-  await A.say({ who: '{rival}', t: 'Hunf. Então você é o novato? Vamos ver quem chega mais longe no espaço.' });
+  const rv = await askText('CADASTRO DE CADETE', '<p class="q">Todo cadete tem um RIVAL: aquele colega metido que acha que sabe tudo.</p><p>Qual é o nome do seu rival?</p>', 'OTÁVIO');
+  A.S.rival = rv;
+  await A.say({ who: '{rival}', t: 'Hunf. Então você é o novato {nome}? Vamos ver quem chega mais longe no espaço.' });
   A.S.started = true; A.save();
   await A.toBase(4, 5, 'down');
   await A.say([
-    { who: 'KDOK', t: 'Bip-bop! Cadete Gabriel! Eu sou o Kdok, o robô ajudante da Astrokdok.' },
+    { who: 'KDOK', t: 'Bip-bop! Cadete {nome}! Eu sou o Kdok, o robô ajudante da Astrokdok.' },
     { who: 'KDOK', t: 'Ande com as setas. Para falar com alguém, fique de frente e aperte A. O botão B abre o menu.' },
     { who: 'KDOK', t: 'Primeiro, fale com o Comandante Julius. É aquele de uniforme preto, perto do foguete!' },
   ]);
@@ -71,7 +75,11 @@ A.boot = async () => {
   await waitStart();
   const opts = had ? ['CONTINUAR', 'NOVO JOGO'] : ['NOVO JOGO'];
   const c = opts[await A.choose('', opts)];
-  if (c === 'CONTINUAR') { await A.toBase(4, 5, 'down'); return; }
+  if (c === 'CONTINUAR') {
+    if (!A.S.nome) await A.askName();
+    await A.toBase(4, 5, 'down');
+    return;
+  }
   if (had) {
     const k = await A.choose('Começar do zero? Todo o progresso salvo será apagado.', ['NÃO, VOLTAR', 'SIM, APAGAR TUDO']);
     if (k === 0) { A.boot(); return; }

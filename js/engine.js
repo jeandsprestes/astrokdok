@@ -136,17 +136,19 @@ const SFX = {
   door: () => { tone(300, 0.06, 'square', 0.04); tone(200, 0.1, 'square', 0.04, 0.06); },
 };
 A.sfx = n => { if (SFX[n]) SFX[n](); };
+A.tone = (f, d = 0.18) => tone(f, d, 'square', 0.05);
+A.hiss = (d = 0.08, v = 0.03) => noise(d, v);
 
 // ---------- salvamento ----------
 const KEY = 'astrokdok.v1';
-A.newSave = () => ({ m: 0, step: 0, stars: 0, items: [], cards: [], rival: 'OTÁVIO', mute: false, lessons: {}, started: false });
+A.newSave = () => ({ m: 0, step: 0, stars: 0, items: [], cards: [], nome: '', rival: 'OTÁVIO', mute: false, lessons: {}, started: false });
 A.load = () => {
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s.m === 'number') { A.S = Object.assign(A.newSave(), s); return true; } } catch (_) {}
   A.S = A.newSave(); return false;
 };
 A.save = () => { try { localStorage.setItem(KEY, JSON.stringify(A.S)); } catch (_) {} };
 A.has = id => A.S.items.includes(id);
-A.fmt = s => String(s).replace(/\{rival\}/g, A.S ? A.S.rival : 'OTÁVIO');
+A.fmt = s => String(s).replace(/\{rival\}/g, A.S ? A.S.rival : 'OTÁVIO').replace(/\{nome\}/g, A.S && A.S.nome ? A.S.nome : 'GABRIEL');
 
 // ---------- caixa de diálogo (estilo Pokémon) ----------
 // lines: texto ou lista; cada item pode ser {who, t}
@@ -189,6 +191,6 @@ A.choose = (q, opts) => new Promise(res => {
   u.querySelectorAll('.opt').forEach(b => b.onclick = () => { A.sfx('blip'); A.uiClose(); res(+b.dataset.i); });
 });
 A.btnWait = (html, label = 'CONTINUAR ▶') => new Promise(res => {
-  const u = A.ui(`${html}<button class="btn" id="go">${label}</button>`);
+  const u = A.ui(`${A.fmt(html)}<button class="btn" id="go">${label}</button>`);
   u.querySelector('#go').onclick = () => { A.sfx('blip'); A.uiClose(); res(); };
 });

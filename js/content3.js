@@ -15,9 +15,9 @@ A.MISSIONS[2] = {
   ],
   teacher: [
     'Good morning, class! Hoje tem INGLÊS: as palavras do espaço.',
-    'Agora, a aula da missão do Gabriel: a nossa estrela, o SOL!',
+    'Agora, a aula da missão do {nome}: a nossa estrela, o SOL!',
   ],
-  after: 'Very good, Gabriel! O Comandante espera você.',
+  after: 'Very good, {nome}! O Comandante espera você.',
 
   lessons: [{
     id: 'm3a', subject: 'INGLÊS', title: 'Space words',
@@ -75,7 +75,7 @@ The stars ARE far.
   site: {
     guide: 'DRA. PAZ',
     intro: [
-      { who: 'DRA. PAZ', t: '¡Hola, Gabriel! Soy la Doctora Paz, astrônoma. Bem-vindo ao Atacama, o melhor céu do mundo!' },
+      { who: 'DRA. PAZ', t: '¡Hola, {nome}! Soy la Doctora Paz, astrônoma. Bem-vindo ao Atacama, o melhor céu do mundo!' },
     ],
     lesson: {
       id: 'm3c', subject: 'GEOGRAFIA · CHILE', title: 'O deserto dos telescópios',
@@ -120,7 +120,7 @@ SOL      = sol</div>`,
   ],
   card: { id: 'sol', name: 'SOL', lines: ['Tipo: estrela', 'Diâmetro: 109 Terras', 'Superfície: 5.500 °C', 'Luz até a Terra: 8 minutos', 'Idade: 4,6 bilhões de anos'] },
   reward: { id: 'vela', name: 'VELA SOLAR', desc: 'Uma vela gigante que usa a luz do Sol para empurrar a nave. Com ela, dá para ir até os outros planetas!' },
-  radio: 'Gabriel, você chegou perto do Sol! Aqui na Terra o dia ficou mais bonito. Mas nunca olhe direto pra ele, combinado? Te amo. Câmbio e desligo.',
+  radio: '{nome}, você chegou perto do Sol! Aqui na Terra o dia ficou mais bonito. Mas nunca olhe direto pra ele, combinado? Te amo. Câmbio e desligo.',
   real: 'Com um adulto, faça um relógio de sol: finque um palito na terra num lugar ensolarado e marque a ponta da sombra a cada hora. O que acontece com a sombra?',
 
   chat: {
@@ -132,16 +132,3 @@ SOL      = sol</div>`,
     kdok: 'Bip! Instalei um escudo de espelho na nave. Aperte A na hora certa e ele reflete as explosões!',
   },
 };
-
-// Final do episódio 1
-A.EPISODE_END = [
-  { who: 'CMTE. JULIUS', t: 'Cadete Gabriel Rosa. Três missões, três sucessos.' },
-  { who: 'CMTE. JULIUS', t: 'A partir de hoje, você não é mais cadete. Você é PILOTO da Astrokdok.' },
-  { who: '{rival}', t: 'Hunf... tá bom. Você é bom. Mas só um pouquinho.' },
-  { who: 'CMTE. JULIUS', t: 'Mercúrio, Vênus, Marte, Júpiter... e além. O sistema solar inteiro está esperando.' },
-  { who: 'CMTE. JULIUS', t: 'Aguarde novas ordens, piloto. Dispensado.' },
-];
-
-// COSMODEX: toda a jornada até o fim do universo conhecido
-A.COSMODEX = ['TERRA', 'LUA', 'SOL', 'MERCÚRIO', 'VÊNUS', 'MARTE', 'CINTURÃO DE ASTEROIDES', 'JÚPITER', 'SATURNO', 'URANO', 'NETUNO', 'PLUTÃO',
-  'PRÓXIMA CENTAURI', 'NEBULOSA DE ÓRION', 'BURACO NEGRO SAGITÁRIO A*', 'NUVENS DE MAGALHÃES', 'GALÁXIA DE ANDRÔMEDA', 'BORDA DO UNIVERSO OBSERVÁVEL'];

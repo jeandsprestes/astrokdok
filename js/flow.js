@@ -1,52 +1,19 @@
 'use strict';
-// Local de lançamento, contagem, minijogo, retorno da missão e fim do episódio.
-const ridge = (x, fn, c, from = 0, to = 160) => { for (let i = from; i < to; i++) { const y = Math.round(fn(i)); A.rect(i, y, 1, 144 - y, c, x); } };
+// Local de lançamento, contagem, minijogo, retorno da missão e fim de episódio.
 const GROUND = 108;
-const SITES = {
-  capao: x => {
-    A.rect(0, 0, 160, 144, 3, x);
-    A.disc(132, 20, 9, 2, x);
-    // Morro do Pai Inácio (topo reto) e a serra
-    ridge(x, i => i > 18 && i < 62 ? 38 + (i < 24 ? (24 - i) * 3 : 0) + (i > 56 ? (i - 56) * 3 : 0) : 64 + Math.sin(i / 11) * 6, 1);
-    A.rect(24, 38, 33, 1, 0, x);
-    ridge(x, i => 76 + Math.sin(i / 9 + 1) * 5, 2);
-    ridge(x, () => GROUND, 1);
-    for (let i = 0; i < 160; i += 7) A.rect(i + (i % 3), GROUND + 4 + (i % 5) * 5, 2, 1, 2, x);
-    for (const tx of [6, 150]) { A.disc(tx, 90, 7, 0, x); A.disc(tx, 90, 6, 1, x); A.rect(tx - 1, 96, 2, 12, 0, x); }
-    A.rect(8, 96, 16, 12, 3, x); A.rect(6, 92, 20, 5, 0, x); A.rect(14, 101, 4, 7, 0, x);
-  },
-  alcantara: x => {
-    A.rect(0, 0, 160, 144, 3, x);
-    A.disc(30, 22, 9, 2, x);
-    for (let i = 0; i < 60; i += 6) A.rect(i, 64 - (i * 7) % 9, 5, 8 + (i * 7) % 9, 1, x);
-    A.rect(0, 70, 160, 30, 1, x);
-    for (let i = 0; i < 12; i++) A.rect((i * 29) % 150, 74 + (i * 7) % 22, 8, 1, 2, x);
-    ridge(x, () => 98, 2);
-    ridge(x, () => GROUND, 1);
-    for (let i = 0; i < 3; i++) { A.rect(10 + i * 12, 86, 3, 22, 0, x); A.rect(10 + i * 12, 84, 12, 3, 0, x); }
-    A.rect(146, 30, 3, 78, 0, x);
-    for (let y = 32; y < 106; y += 6) A.rect(140, y, 12, 1, 0, x);
-    A.rect(140, 30, 1, 78, 0, x);
-  },
-  atacama: x => {
-    A.rect(0, 0, 160, 144, 0, x);
-    for (let i = 0; i < 70; i++) A.rect((i * 37) % 160, (i * 23) % 60, 1, 1, i % 5 ? 3 : 2, x);
-    ridge(x, i => 58 + Math.abs(((i + 20) % 60) - 30) * 0.9, 1);
-    ridge(x, i => 90 + Math.sin(i / 14) * 4, 2);
-    ridge(x, () => GROUND, 1);
-    for (const [dx, r] of [[18, 9], [42, 7]]) { A.disc(dx, 90, r, 3, x); A.rect(dx - r, 90, r * 2 + 1, r, 3, x); A.rect(dx - 1, 90 - r, 2, r, 1, x); }
-    for (let i = 0; i < 4; i++) { const ax = 62 + i * 10; A.rect(ax + 3, 92, 2, 8, 3, x); A.rect(ax, 88, 8, 2, 3, x); A.rect(ax + 1, 90, 6, 1, 3, x); }
-  },
-};
-const GUIDE = { capao: 'dito', alcantara: 'nara', atacama: 'paz' };
+const OLD_GUIDE = { capao: 'dito', alcantara: 'nara', atacama: 'paz' };
 
-A.siteScene = kind => {
-  const bg = A.mk(160, 144, x => { SITES[kind](x); A.rect(104, GROUND, 44, 4, 0, x); A.rect(106, GROUND, 40, 1, 2, x); });
+A.siteScene = M => {
+  const kind = M.scene;
+  const bg = A.mk(160, 144, x => { A.SITES[kind](x); A.rect(104, GROUND, 44, 4, 0, x); A.rect(106, GROUND, 40, 1, 2, x); });
+  const guide = M.site.look ? A.look(M.site.look) : A.CH[OLD_GUIDE[kind]];
+  const extra = (M.site.extra || []).map(l => typeof l === 'string' ? A.CH[l] : A.look(l));
   const s = { cd: null, t: 0 };
   s.update = dt => { s.t += dt; };
   s.draw = () => {
     A.draw(bg, 0, 0);
-    A.draw(A.CH[GUIDE[kind]].down[0], 30, GROUND - 14);
+    extra.forEach((c, i) => A.draw(c.down[0], 4 + i * 14, GROUND - 14));
+    A.draw(guide.down[0], 30, GROUND - 14);
     A.draw(A.GAB.right[0], 52, GROUND - 14);
     A.draw(A.KDOK, 72, GROUND - 15 + Math.round(Math.sin(s.t * 4)));
     A.drawS(A.SHIPS[A.shipLevel()], 110, GROUND - 32, 2);
@@ -57,7 +24,7 @@ A.siteScene = kind => {
 
 A.runSite = async M => {
   await A.fade(1);
-  const sc = A.siteScene(M.scene);
+  const sc = A.siteScene(M);
   A.setScene(sc);
   A.hud(M.where.toUpperCase(), `★ ${A.S.stars}`);
   await A.fade(0);
@@ -92,33 +59,37 @@ A.runLaunch = async (M, sc) => {
 
 A.debriefScene = body => {
   const st = A.stars(50);
-  const img = body === 'earth' ? A.bigEarth(44) : body === 'moon' ? A.bigEarth(11) : A.bigSun(70);
+  const gen = A.BODIES[body] && A.BODIES[body]();
+  const img = gen ? gen.img : body === 'earth' ? A.bigEarth(44) : body === 'moon' ? A.bigEarth(11) : A.bigSun(70);
   const s = { mode: 'body', t: 0 };
   s.update = dt => { s.t += dt; };
   s.draw = () => {
-    const t = s.t;
-    A.cls(0); A.drawStars(st, 3);
+    const t = s.t, ship = A.SHIPS[A.shipLevel()];
     if (s.mode === 'reward') {
+      A.cls(0); A.drawStars(st, 3);
       for (let i = 0; i < 12; i++) { const a = i / 12 * 6.28 + t; A.rect(80 + Math.cos(a) * (40 + Math.sin(t * 3) * 4), 70 + Math.sin(a) * 40, 2, 2, 2); }
-      A.drawS(A.SHIPS[A.shipLevel()], 48, 38, 4);
+      A.drawS(ship, 48, 38, 4);
       return;
     }
     if (s.mode === 'radio') {
+      A.cls(0); A.drawStars(st, 3);
       A.draw(A.bigEarth(20), 58, 90);
       for (let k = 0; k < 4; k++) { const r = ((t * 30 + k * 12) % 48) + 6; A.rect(80 - r, 80 - r * 0.6, r * 2, 1, k % 2 ? 2 : 3); }
       A.txtC('RADIO DE CASA', 12, 2);
       return;
     }
-    if (body === 'earth') { A.draw(img, 36, 30); A.draw(A.SHIPS[A.shipLevel()], 10 + (t * 8) % 40, 12); }
+    if (gen) { A.draw(img, 0, 0); A.draw(ship, gen.ship[0], gen.ship[1] + Math.round(Math.sin(t * 3) * 2)); return; }
+    A.cls(0); A.drawStars(st, 3);
+    if (body === 'earth') { A.draw(img, 36, 30); A.draw(ship, 10 + (t * 8) % 40, 12); }
     else if (body === 'moon') {
       A.draw(img, 118, 16);
-      ridge(A.ctx, i => 104 + Math.sin(i / 12) * 4 + Math.sin(i / 5) * 1.5, 3);
+      for (let i = 0; i < 160; i++) { const y = Math.round(104 + Math.sin(i / 12) * 4 + Math.sin(i / 5) * 1.5); A.rect(i, y, 1, 144 - y, 3); }
       A.disc(30, 118, 6, 2); A.disc(128, 126, 8, 2);
-      A.draw(A.SHIPS[A.shipLevel()], 64, 88);
+      A.draw(ship, 64, 88);
       A.rect(92, 84, 1, 20, 0); A.rect(93, 84, 8, 3, 2); A.rect(93, 87, 8, 3, 0);
     } else {
       A.draw(img, 10, -80);
-      A.draw(A.SHIPS[A.shipLevel()], 72, 104 + Math.round(Math.sin(t * 3) * 2));
+      A.draw(ship, 72, 104 + Math.round(Math.sin(t * 3) * 2));
       A.rect(69, 100, 22, 2, 3);
     }
   };
@@ -142,18 +113,26 @@ A.runDebrief = async M => {
   await A.btnWait(`<span class="tag">RÁDIO DE CASA · MENSAGEM RECEBIDA</span><p>"${M.radio}"</p><p style="text-align:right">— Papai</p>`, 'CÂMBIO ▶');
   await A.btnWait(`<span class="tag">MISSÃO DE VERDADE</span><h2>Para fazer fora do jogo</h2><p>${M.real}</p>`, 'ACEITO ▶');
   A.S.m++; A.S.step = 0; A.save();
-  if (A.over()) await A.episodeEnd();
+  const ep = A.EPISODES.find(e => e.upTo === A.S.m);
+  if (ep) await A.episodeEnd(ep);
   await A.toBase(5, 5, 'right');
   if (!A.over()) await A.say({ who: 'KDOK', t: 'Bip! O Comandante quer falar com você sobre a próxima missão!' });
 };
 
-A.episodeEnd = async () => {
-  const st = A.stars(80);
+A.episodeEnd = async ep => {
+  const st = A.stars(80), last = ep.n === A.EPISODES.length;
   let t = 0;
-  A.setScene({ update(dt) { t += dt; }, draw() { A.cls(0); A.drawStars(st, 3, t * 6); A.txtO('FIM DO', 80 - A.txtW('FIM DO', 2) / 2, 40, 2, 0, 2); A.txtO('EPISODIO 1', 80 - A.txtW('EPISODIO 1', 2) / 2, 56, 2, 0, 2); A.drawS(A.SHIPS[2], 64, 80, 2); } });
-  A.hud('ASTROKDOK', `★ ${A.S.stars}`);
-  await A.say(A.EPISODE_END);
-  await A.btnWait(`<span class="tag">FIM DO EPISÓDIO 1</span><h2>Gabriel Rosa, piloto da Astrokdok</h2>
+  A.setScene({ update(dt) { t += dt; }, draw() {
+    A.cls(0); A.drawStars(st, 3, t * 6);
+    const a = last ? 'VOCE ZEROU' : 'FIM DO', b = last ? 'ASTROKDOK!' : `EPISODIO ${ep.n}`;
+    A.txtO(a, 80 - A.txtW(a, 2) / 2, 36, 2, 0, 2); A.txtO(b, 80 - A.txtW(b, 2) / 2, 52, 2, 0, 2);
+    A.drawS(A.SHIPS[A.shipLevel()], 64, 76 + Math.round(Math.sin(t * 2) * 3), 2);
+  } });
+  A.hud(last ? 'ASTROKDOK · FIM' : `EPISÓDIO ${ep.n} · ${ep.title.toUpperCase()}`, `★ ${A.S.stars}`);
+  if (last) A.sfx('win');
+  await A.say(ep.end);
+  const next = A.EPISODES[ep.n];
+  await A.btnWait(`<span class="tag">${last ? 'VOCÊ ZEROU ASTROKDOK' : `FIM DO EPISÓDIO ${ep.n}`}</span><h2>${ep.rank} {nome}</h2>
     <p>Estrelas: <b>★ ${A.S.stars}</b><br>Cosmodex: <b>${A.S.cards.length}/${A.COSMODEX.length}</b></p>
-    <p>Próximo episódio: <b>MERCÚRIO, VÊNUS e MARTE</b>.</p><p>Continua...</p>`, 'VOLTAR PARA A BASE ▶');
+    ${next ? `<p>Próximo episódio: <b>${next.title.toUpperCase()}</b>.</p><p>Continua...</p>` : '<p>Da Terra até a borda do universo observável. Obrigado por jogar, comandante.</p>'}`, 'VOLTAR PARA A BASE ▶');
 };

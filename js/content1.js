@@ -7,7 +7,7 @@ A.MISSIONS[0] = {
   go: 'Ir para a plataforma de lançamento?',
 
   brief: [
-    { who: 'CMTE. JULIUS', t: 'Cadete Gabriel Rosa. Sou o Comandante Julius. Bem-vindo à Astrokdok.' },
+    { who: 'CMTE. JULIUS', t: 'Cadete {nome}. Sou o Comandante Julius. Bem-vindo à Astrokdok.' },
     { who: 'CMTE. JULIUS', t: 'Sua primeira missão: subir até a órbita e fotografar a Terra lá de cima.' },
     { who: 'CMTE. JULIUS', t: 'Mas nesta empresa ninguém voa sem estudar. Vá até a ESCOLA. Duas aulas. Depois, fale comigo.' },
   ],
@@ -18,9 +18,9 @@ A.MISSIONS[0] = {
   ],
   teacher: [
     'Bom dia, turma! Primeira aula: PORTUGUÊS. Vamos descobrir qual sílaba manda na palavra.',
-    'Agora, a aula da missão do Gabriel: o nosso planeta, a TERRA!',
+    'Agora, a aula da missão do {nome}: o nosso planeta, a TERRA!',
   ],
-  after: 'Parabéns, Gabriel! Pode ir falar com o Comandante Julius.',
+  after: 'Parabéns, {nome}! Pode ir falar com o Comandante Julius.',
 
   lessons: [{
     id: 'm1a', subject: 'PORTUGUÊS', title: 'A sílaba que manda',
@@ -124,7 +124,7 @@ TERMOSFERA · até 600 km
   ],
   card: { id: 'terra', name: 'TERRA', lines: ['Diâmetro: 12.742 km', 'Dia: 24 horas', 'Ano: 365 dias', 'Luas: 1', 'Água: 7 de cada 10 partes', 'Único lugar conhecido com vida'] },
   reward: { id: 'turbo', name: 'PROPULSOR TURBO', desc: 'A nave ganha mais força e mais combustível. Vai ajudar muito no pouso da próxima missão.' },
-  radio: 'Gabriel, aqui é o papai. Vi um risquinho de fumaça subindo lá do Capão e sabia que era você. Tô orgulhoso, filho. Câmbio!',
+  radio: '{nome}, aqui é o papai. Vi um risquinho de fumaça subindo lá do Capão e sabia que era você. Tô orgulhoso, filho. Câmbio!',
   real: 'Hoje, repare de que lado o Sol se põe. Aquele lado é o OESTE. O leste fica do lado oposto. Mostre para alguém de casa!',
 
   chat: {

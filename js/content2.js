@@ -15,9 +15,9 @@ A.MISSIONS[1] = {
   ],
   teacher: [
     'Bom dia, turma! Aula de MATEMÁTICA: divisão. Hoje vamos dividir até combustível de foguete.',
-    'Agora, a aula da missão do Gabriel: a LUA!',
+    'Agora, a aula da missão do {nome}: a LUA!',
   ],
-  after: 'Muito bem, Gabriel! O Comandante está esperando.',
+  after: 'Muito bem, {nome}! O Comandante está esperando.',
 
   lessons: [{
     id: 'm2a', subject: 'MATEMÁTICA', title: 'Dividir no espaço',

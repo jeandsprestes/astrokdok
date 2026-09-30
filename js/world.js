@@ -23,24 +23,45 @@ const TILE = {
   'e': (x, px, py) => { R(x, px, py, T, T, 2); R(x, px + 2, py + 2, 12, 14, 0); R(x, px + 3, py + 3, 10, 13, 1); R(x, px + 10, py + 9, 2, 2, 2); },
   'S': (x, px, py) => { grass(x, px, py); R(x, px + 7, py + 8, 2, 7, 0); R(x, px + 4, py + 13, 3, 2, 0); R(x, px + 9, py + 13, 3, 2, 0); for (let i = 0; i < 9; i++) R(x, px + 2 + i, py + 8 - Math.floor(i / 2), 2, 3, i === 8 ? 2 : 0); },
   'R': (x, px, py) => { R(x, px, py, T, T, 1); R(x, px, py, T, 1, 0); R(x, px, py, 1, T, 0); for (let i = 2; i < T; i += 4) R(x, px + i, py + i, 3, 1, 2); },
+  // estante de livros
+  'Q': (x, px, py) => { R(x, px, py, T, T, 0); for (let r = 0; r < 3; r++) { R(x, px + 1, py + 1 + r * 5, 14, 4, 1); for (let i = 0; i < 6; i++) R(x, px + 2 + i * 2, py + 1 + r * 5 + (i % 2), 1, 4 - (i % 2), [2, 3, 2, 1, 3, 2][(i + r) % 6]); } },
+  // prateleira de laboratório
+  'L': (x, px, py) => { wall(x, px, py); R(x, px, py + 9, T, 2, 0); [[2, 3], [7, 2], [11, 3]].forEach(([a, h]) => { R(x, px + a, py + 9 - h * 2, 3, h * 2, 3); R(x, px + a + 1, py + 9 - h * 2 - 2, 1, 2, 3); R(x, px + a, py + 7, 3, 2, 2); }); },
+  // bancada de laboratório
+  'K': (x, px, py) => { floor(x, px, py); R(x, px + 1, py + 3, 14, 10, 0); R(x, px + 2, py + 4, 12, 8, 3); R(x, px + 3, py + 5, 3, 5, 2); R(x, px + 4, py + 3, 1, 2, 0); R(x, px + 9, py + 7, 4, 3, 1); },
+  // mesa de piquenique (pátio)
+  'P': (x, px, py) => { grass(x, px, py); R(x, px + 1, py + 4, 14, 8, 0); R(x, px + 2, py + 5, 12, 6, 1); for (let i = 4; i < 14; i += 4) R(x, px + i, py + 5, 1, 6, 2); },
+  // banquinho no pátio (h = do jogador)
+  'j': (x, px, py) => { grass(x, px, py); A.disc(px + 8, py + 8, 4, 0, x); A.disc(px + 8, py + 8, 3, 1, x); },
+  'h': (x, px, py) => { grass(x, px, py); A.disc(px + 8, py + 8, 5, 0, x); A.disc(px + 8, py + 8, 4, 2, x); R(x, px + 7, py + 6, 2, 5, 0); R(x, px + 5, py + 8, 6, 1, 0); },
+  // portão do pátio
+  'o': (x, px, py) => { R(x, px, py, T, T, 2); [[2, 3], [9, 6], [5, 11]].forEach(([a, b]) => R(x, px + a, py + b, 2, 1, 1)); },
 };
-const SOLID = '#WBDTctrwSR';
+const SOLID = '#WBDTctrwSRQLKPj';
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const OPP = { up: 'down', down: 'up', left: 'right', right: 'left' };
 
 A.MAPS = {
   base: ['rrrrttrrrr', 'wwwwttwwww', 'wwewttweww', ',,p,,,,p,,', ',,pppppp,,', 't,,,p,,,,t', 'tS,,p,,RRt', 't,,,p,,RRt', 'tttttttttt'],
   school: ['#WBBBBBW##', '#.....TT.#', '#........#', '#.D.D.D..#', '#.c.c.g..#', '#.D.D.D..#', '#.c.c.c..#', '#........#', '####d#####'],
+  lab: ['#LBBBBBLL#', '#.....TT.#', '#........#', '#.K.K.K..#', '#.c.c.g..#', '#.K.K.K..#', '#.c.c.c..#', '#........#', '####d#####'],
+  biblio: ['#QBBBBBQQ#', '#.....TT.Q', '#........Q', '#.D.D.D..Q', '#.c.c.g..#', '#.D.D.D..Q', '#.c.c.c..Q', '#........#', '####d#####'],
+  patio: ['ttBBBBBttt', 't,,,,,PP,t', 't,,,,,,,,t', 't,P,P,P,,t', 't,j,j,h,,t', 't,P,P,P,,t', 't,j,j,j,,t', 't,,,,,,,,t', 'tttto,tttt'],
 };
+const NIGHT = ['#050505', '#1c1600', '#5a4600', '#8a7a40'];
 
 A.GAB = A.makeChar(0, 2, 1);
 
 // def: { rows, paint(x), extra(ctx,t), npcs: [...], onStep(x,y,ch) → fn?, onFace(x,y,ch) → fn?, onB → fn }
 A.worldScene = (def, sx, sy, sdir = 'down') => {
+  const pal = A.PAL;
+  if (def.night) A.PAL = NIGHT;
   const bg = A.mk(A.W, A.H, x => {
     def.rows.forEach((r, j) => [...r].forEach((ch, i) => (TILE[ch] || floor)(x, i * T, j * T)));
     if (def.paint) def.paint(x);
+    if (def.night) for (let i = 0; i < 40; i++) { x.fillStyle = pal[i % 4 ? 3 : 2]; x.fillRect((i * 37) % 160, (i * 53) % 144, 1, 1); }
   });
+  A.PAL = pal;
   const pl = { x: sx, y: sy, ox: sx, oy: sy, dir: sdir, mv: 0, n: 0 };
   const npcs = def.npcs || [];
   let t = 0, bump = 0;
