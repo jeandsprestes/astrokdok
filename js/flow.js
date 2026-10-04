@@ -113,6 +113,7 @@ A.runDebrief = async M => {
   await A.btnWait(`<span class="tag">RÁDIO DE CASA · MENSAGEM RECEBIDA</span><p>"${M.radio}"</p><p style="text-align:right">— Papai</p>`, 'CÂMBIO ▶');
   await A.btnWait(`<span class="tag">MISSÃO DE VERDADE</span><h2>Para fazer fora do jogo</h2><p>${M.real}</p>`, 'ACEITO ▶');
   A.S.m++; A.S.step = 0; A.save();
+  await A.btnWait(A.saveCardHtml(), 'CONTINUAR ▶');
   const ep = A.EPISODES.find(e => e.upTo === A.S.m);
   if (ep) await A.episodeEnd(ep);
   await A.toBase(5, 5, 'right');

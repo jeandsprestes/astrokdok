@@ -5,6 +5,16 @@ body{font-family:'VT323',monospace;display:flex;justify-content:center;user-sele
 button{font:inherit;cursor:pointer}
 #app{width:100%;max-width:480px;height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--k)}
 
+#top{display:flex;align-items:center;flex:none}
+#top #hud{flex:1;min-width:0}
+#saveBtn{flex:none;margin:4px 8px 2px 0;font-family:'VT323',monospace;font-size:19px;line-height:1;background:var(--y);color:var(--k);border:0;border-radius:4px;padding:4px 8px}
+#saveBtn[hidden],#card[hidden]{display:none}
+#app{position:relative}
+#card{position:absolute;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
+#cardBox{width:100%;max-width:420px;max-height:100%;overflow-y:auto;background:var(--l);color:var(--k);border:4px double var(--k);box-shadow:0 0 0 3px var(--y);border-radius:6px;padding:14px;font-size:24px;line-height:1.08}
+#cardBox h2{font-size:30px;color:var(--d);margin-bottom:8px;text-transform:uppercase}
+#cardBox p{margin-bottom:10px}
+.code{font-family:'Press Start 2P',monospace;font-size:28px;letter-spacing:6px;text-align:center;background:var(--k);color:var(--y);border-radius:6px;padding:16px 4px 14px;margin:6px 0 12px}
 #hud{font-family:'VT323',monospace;font-size:21px;line-height:1;letter-spacing:.5px;color:var(--y);padding:8px 10px 6px;min-height:28px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #hud span:last-child{text-align:right}
 

@@ -32,6 +32,7 @@ const askText = (tag, html, def) => new Promise(res => {
   inp.onfocus = () => inp.select();
   u.querySelector('#ok').onclick = () => { const v = clean(inp.value); A.sfx('ok'); A.uiClose(); res(v || def); };
 });
+A.askRival = () => askText('CADASTRO DE CADETE', '<p class="q">Todo cadete tem um RIVAL: aquele colega metido que acha que sabe tudo.</p><p>Qual é o nome do seu rival?</p>', (A.S && A.S.rival) || 'OTÁVIO');
 A.askName = async () => {
   A.S.nome = await askText('CADASTRO DE CADETE', '<p class="q">Bem-vindo à Astrokdok!</p><p>Qual é o seu nome, cadete?</p>', A.S.nome || 'GABRIEL');
   A.save();
@@ -56,8 +57,7 @@ A.intro = async () => {
     '"Parabéns! Você foi aceito como CADETE da ASTROKDOK, a empresa de viagens espaciais."',
     '"Você vai estudar na Escola Municipal do Capão e voar com a gente. Traga curiosidade. O resto a gente ensina."',
   ]);
-  const rv = await askText('CADASTRO DE CADETE', '<p class="q">Todo cadete tem um RIVAL: aquele colega metido que acha que sabe tudo.</p><p>Qual é o nome do seu rival?</p>', 'OTÁVIO');
-  A.S.rival = rv;
+  A.S.rival = await A.askRival();
   await A.say({ who: '{rival}', t: 'Hunf. Então você é o novato {nome}? Vamos ver quem chega mais longe no espaço.' });
   A.S.started = true; A.save();
   await A.toBase(4, 5, 'down');
@@ -73,8 +73,23 @@ A.boot = async () => {
   A.setScene(A.titleScene());
   A.hud('ASTROKDOK', had ? `★ ${A.S.stars}` : '');
   await waitStart();
-  const opts = had ? ['CONTINUAR', 'NOVO JOGO'] : ['NOVO JOGO'];
+  // link com código de save (?save=XXXXX)
+  const q = new URLSearchParams(location.search).get('save');
+  if (q) {
+    history.replaceState(null, '', location.pathname);
+    const lc = A.readCode(q);
+    if (lc) {
+      const k = await A.choose(`Código de save encontrado: <b>${A.codeLabel(lc)}</b>. Carregar?`, ['SIM, CARREGAR', 'NÃO, IGNORAR']);
+      if (k === 0 && await A.loadCode(lc)) return;
+    }
+  }
+  const opts = had ? ['CONTINUAR', 'CARREGAR CÓDIGO', 'NOVO JOGO'] : ['NOVO JOGO', 'CARREGAR CÓDIGO'];
   const c = opts[await A.choose('', opts)];
+  if (c === 'CARREGAR CÓDIGO') {
+    const code = await A.enterCode();
+    if (!code || !await A.loadCode(code)) A.boot();
+    return;
+  }
   if (c === 'CONTINUAR') {
     if (!A.S.nome) await A.askName();
     await A.toBase(4, 5, 'down');

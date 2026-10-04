@@ -90,7 +90,7 @@ let last = 0;
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000 || 0); last = t;
   const s = A.scene;
-  if (s) { if (s.update) s.update(dt); if (s.draw) s.draw(A.ctx); }
+  if (s && $('#card').hidden) { if (s.update) s.update(dt); if (s.draw) s.draw(A.ctx); }
   A.P = {};
   requestAnimationFrame(frame);
 }
@@ -98,7 +98,7 @@ requestAnimationFrame(frame);
 
 A.fade = (on, ms = 260) => new Promise(r => { const f = $('#fade'); f.style.transition = `opacity ${ms}ms`; f.style.opacity = on ? 1 : 0; setTimeout(r, ms + 20); });
 A.readMode = on => $('#app').classList.toggle('read', !!on);
-A.hud = (l, r = '') => { $('#hud').innerHTML = `<span>${l}</span><span>${r}</span>`; };
+A.hud = (l, r = '') => { $('#hud').innerHTML = `<span>${l}</span><span>${r}</span>`; $('#saveBtn').hidden = !(A.S && A.S.started); };
 
 // ---------- som (bipes estilo Game Boy) ----------
 let ac = null;

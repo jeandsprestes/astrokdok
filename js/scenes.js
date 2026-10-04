@@ -123,7 +123,9 @@ A.runClass = async () => {
 // ---------- menus ----------
 A.menu = async () => {
   for (;;) {
-    const c = await A.choose(`<b>${A.rank()} {nome}</b><br><b>OBJETIVO:</b> ${A.objective()}`, ['COSMODEX', 'NAVE E ITENS', 'RÁDIO DE CASA', 'MISSÕES DE VERDADE', `SOM: ${A.S.mute ? 'DESLIGADO' : 'LIGADO'}`, 'FECHAR']);
+    let c = await A.choose(`<b>${A.rank()} {nome}</b><br><b>OBJETIVO:</b> ${A.objective()}`, ['SALVAR JOGO', 'COSMODEX', 'NAVE E ITENS', 'RÁDIO DE CASA', 'MISSÕES DE VERDADE', `SOM: ${A.S.mute ? 'DESLIGADO' : 'LIGADO'}`, 'FECHAR']);
+    if (c === 0) { await A.manualSave(); continue; }
+    c--;
     if (c === 0) await A.cosmodex();
     else if (c === 1) await A.hangar();
     else if (c === 2) await A.radio();
