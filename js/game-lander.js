@@ -5,7 +5,7 @@ A.GAMES.lander = () => new Promise(done => {
   const G = 9, THR = turbo ? 25 : 19, SIDE = 11, FMAX = turbo ? 100 : 70, SAFE_V = 15, SAFE_H = 14;
   const ship = A.SHIPS[A.shipLevel()];
   const stars = A.stars(45);
-  const earth = A.bigEarth(7);
+  const earth = A.withPal('terra_pl', () => A.bigEarth(7)); // Terra azul e verde no céu
   // terreno
   const pad = { x: A.ri(96, 128), w: 24 };
   const ground = new Array(160);
@@ -17,14 +17,18 @@ A.GAMES.lander = () => new Promise(done => {
   // a aproximação da plataforma fica sempre mais baixa que ela (sem morro no caminho)
   for (let x = pad.x - 34; x < pad.x + pad.w + 16; x++) if (x >= 0 && x < 160 && (x < pad.x || x >= pad.x + pad.w)) ground[x] = Math.max(ground[x], py + 3 + Math.sin(x / 3) * 1.5);
   for (let x = pad.x; x < pad.x + pad.w; x++) ground[x] = py;
+  // solo lunar cinza: borda clara (luz do Sol), manchas escuras; plataforma da Astrokdok em faixas amarelo/preto
   const terrain = A.mk(160, 144, c => {
     for (let x = 0; x < 160; x++) {
       const g = Math.round(ground[x]);
-      A.rect(x, g, 1, 144 - g, 3, c); A.rect(x, g, 1, 1, 1, c);
-      for (let y = g + 3; y < 144; y += 5) if ((x * 7 + y * 3) % 11 === 0) A.rect(x, y, 2, 1, 2, c);
+      A.rect(x, g, 1, 144 - g, '#8e8e98', c); A.rect(x, g, 1, 1, '#dcdce4', c);
+      for (let y = g + 3; y < 144; y += 5) if ((x * 7 + y * 3) % 11 === 0) A.rect(x, y, 2, 1, '#5e5e68', c);
     }
-    A.rect(pad.x, py, pad.w, 3, 2, c); A.rect(pad.x, py + 3, pad.w, 1, 0, c);
+    A.rect(pad.x, py, pad.w, 3, '#f2c200', c);
+    for (let i = 0; i < pad.w; i++) for (let j = 0; j < 3; j++) if ((i + j) % 6 < 2) A.rect(pad.x + i, py + j, 1, 1, '#0e0e0e', c);
+    A.rect(pad.x, py + 3, pad.w, 1, '#0e0e0e', c);
   });
+  const GO = '#5dff7a', BAD = '#ff3a3a'; // verde = pode, vermelho = perigo
 
   const s = { x: 18, y: 14, vx: 10, vy: 0 };
   let fuel = FMAX, state = 'play', endT = 0, t = 0, burn = false, side = 0, msg = '';
@@ -61,27 +65,31 @@ A.GAMES.lander = () => new Promise(done => {
       }
     },
     draw() {
+      A.usePal('espaco'); // céu preto com estrelas
       A.cls(0);
       A.drawStars(stars, 3);
       A.draw(earth, 130, 16);
       A.draw(terrain, 0, 0);
-      if (state === 'play' && Math.floor(t * 3) % 2) { A.rect(pad.x, py - 1, 2, 1, 2); A.rect(pad.x + pad.w - 2, py - 1, 2, 1, 2); }
-      if (state === 'play' && t < 5 && Math.floor(t * 3) % 2) A.txt('POUSE AQUI', pad.x + pad.w / 2 - 19, py - 22, 2);
-      if (state === 'play' && t < 5) A.txt('V', pad.x + pad.w / 2 - 1, py - 14, 2);
-      if (state === 'lose') for (let k = 0; k < 10; k++) A.disc(s.x + 8 + A.ri(-9, 9), s.y + 8 + A.ri(-8, 6), A.ri(1, 4), A.ri(0, 2));
+      if (state === 'play' && Math.floor(t * 3) % 2) { A.rect(pad.x, py - 1, 2, 1, GO); A.rect(pad.x + pad.w - 2, py - 1, 2, 1, GO); }
+      if (state === 'play' && t < 5 && Math.floor(t * 3) % 2) A.txt('POUSE AQUI', pad.x + pad.w / 2 - 19, py - 22, GO);
+      if (state === 'play' && t < 5) A.txt('V', pad.x + pad.w / 2 - 1, py - 14, GO);
+      if (state === 'lose') for (let k = 0; k < 10; k++) A.disc(s.x + 8 + A.ri(-9, 9), s.y + 8 + A.ri(-8, 6), A.ri(1, 4), A.pick(A.BOOM));
       else {
         if (burn) A.draw(A.FLAME[Math.floor(t * 12) % 2], s.x + 5, s.y + 13);
-        if (side) A.rect(side > 0 ? s.x + 1 : s.x + 13, s.y + 8, 2, 2, 3);
+        if (side) A.rect(side > 0 ? s.x + 1 : s.x + 13, s.y + 8, 2, 2, '#dff4ff');
         A.draw(ship, s.x, s.y);
       }
       // painel
+      A.usePal('ui');
       A.rect(0, 0, 160, 9, 0);
       A.txt('COMB', 3, 2, 3);
-      A.rect(21, 2, 42, 5, 1); A.rect(22, 3, Math.round(40 * fuel / FMAX), 3, fuel < FMAX * 0.25 && Math.floor(t * 6) % 2 ? 3 : 2);
+      // combustível: verde → amarelo → vermelho (pisca no fim)
+      const fr = fuel / FMAX, fc = fr > 0.5 ? '#3ad65a' : fr > 0.25 ? '#f0b020' : Math.floor(t * 6) % 2 ? '#ff9a9a' : BAD;
+      A.rect(21, 2, 42, 5, 1); A.rect(22, 3, Math.round(40 * fuel / FMAX), 3, fc);
       const v = Math.round(state === 'play' ? s.vy : 0), okv = v < SAFE_V;
-      A.txt(`VEL ${Math.max(0, v)}`, 70, 2, okv ? 2 : 3);
-      A.txt(okv ? 'OK' : 'FREIE!', 106, 2, okv ? 2 : (Math.floor(t * 8) % 2 ? 3 : 1));
-      if (fuel <= 0 && state === 'play') A.txtC('SEM COMBUSTIVEL', 14, 3);
+      A.txt(`VEL ${Math.max(0, v)}`, 70, 2, okv ? GO : BAD);
+      A.txt(okv ? 'OK' : 'FREIE!', 106, 2, okv ? GO : (Math.floor(t * 8) % 2 ? BAD : '#7a1414'));
+      if (fuel <= 0 && state === 'play') A.txtC('SEM COMBUSTIVEL', 14, BAD);
       if (msg) { A.rect(0, 60, 160, 13, 0); A.txtC(msg, 64, 2); }
     },
   });

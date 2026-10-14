@@ -4,7 +4,9 @@ const A = window.A = {};
 const $ = s => document.querySelector(s);
 A.$ = $;
 A.W = 160; A.H = 144;
-A.PAL = ['#0e0e0e', '#6b5200', '#f2c200', '#fff4c0']; // 0 preto · 1 escuro · 2 amarelo · 3 claro
+A.PAL = ['#0e0e0e', '#6b5200', '#f2c200', '#fff4c0']; // paleta ativa (ver palette.js): 0 escuro → 3 claro
+// cor de um desenho: índice da paleta ativa (0-3) ou uma cor direta ('#3b6fd6')
+A.col = p => typeof p === 'string' ? p : A.PAL[p];
 A.cv = $('#c');
 A.ctx = A.cv.getContext('2d');
 A.ctx.imageSmoothingEnabled = false;
@@ -18,17 +20,17 @@ A.spr = (rows, map) => A.mk(rows[0].length, rows.length, x => {
       let ch = r[i];
       if (map && ch in map) ch = map[ch];
       if (ch === '.' || ch === ' ' || ch === -1) continue;
-      x.fillStyle = A.PAL[+ch]; x.fillRect(i, j, 1, 1);
+      x.fillStyle = typeof ch === 'string' && ch.length > 1 ? ch : A.PAL[+ch]; x.fillRect(i, j, 1, 1);
     }
   });
 });
 A.flip = c => A.mk(c.width, c.height, x => { x.translate(c.width, 0); x.scale(-1, 1); x.drawImage(c, 0, 0); });
-A.rect = (x, y, w, h, p, ctx = A.ctx) => { ctx.fillStyle = A.PAL[p]; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
+A.rect = (x, y, w, h, p, ctx = A.ctx) => { ctx.fillStyle = A.col(p); ctx.fillRect(Math.round(x), Math.round(y), w, h); };
 A.cls = p => A.rect(0, 0, A.W, A.H, p);
 A.draw = (img, x, y, ctx = A.ctx) => ctx.drawImage(img, Math.round(x), Math.round(y));
 A.drawS = (img, x, y, s, ctx = A.ctx) => ctx.drawImage(img, Math.round(x), Math.round(y), img.width * s, img.height * s);
 A.disc = (cx, cy, r, p, ctx = A.ctx) => {
-  ctx.fillStyle = A.PAL[p];
+  ctx.fillStyle = A.col(p);
   for (let y = -r; y <= r; y++) { const w = Math.floor(Math.sqrt(r * r - y * y + r * 0.8)); ctx.fillRect(Math.round(cx - w), Math.round(cy + y), w * 2 + 1, 1); }
 };
 A.rnd = (a, b) => a + Math.random() * (b - a);
@@ -98,7 +100,7 @@ requestAnimationFrame(frame);
 
 A.fade = (on, ms = 260) => new Promise(r => { const f = $('#fade'); f.style.transition = `opacity ${ms}ms`; f.style.opacity = on ? 1 : 0; setTimeout(r, ms + 20); });
 A.readMode = on => $('#app').classList.toggle('read', !!on);
-A.hud = (l, r = '') => { $('#hud').innerHTML = `<span>${l}</span><span>${r}</span>`; $('#saveBtn').hidden = !(A.S && A.S.started); };
+A.hud = (l, r = '') => { $('#hud').innerHTML = `<span>${l}</span><span>${r}</span>`; $('#saveBtn').hidden = !(A.S && A.S.started); $('#skipBtn').hidden = !A.skipArmed; };
 
 // ---------- som (bipes estilo Game Boy) ----------
 let ac = null;

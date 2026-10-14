@@ -55,6 +55,14 @@ A.showCard = html => new Promise(res => {
   A.modal = { key: () => true };
   box.querySelector('#cardOk').onclick = () => { A.sfx('blip'); card.hidden = true; A.modal = prev; res(); };
 });
+// cartão com várias opções (devolve o índice escolhido); o jogo fica pausado enquanto está aberto
+A.cardChoice = (html, labels) => new Promise(res => {
+  const card = A.$('#card'), box = A.$('#cardBox'), prev = A.modal;
+  box.innerHTML = A.fmt(html) + labels.map((l, i) => `<button class="btn${i ? ' alt' : ''}" data-i="${i}">${l}</button>`).join('');
+  card.hidden = false;
+  A.modal = { key: () => true };
+  box.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { A.sfx('blip'); card.hidden = true; A.modal = prev; res(+b.dataset.i); });
+});
 A.saveCardHtml = () => {
   const c = { m: A.S.m, step: A.over() ? 0 : A.S.step, stars: A.S.stars };
   return `<span class="tag">JOGO SALVO</span><h2>Seu código de save</h2><div class="code">${A.saveCode()}</div>

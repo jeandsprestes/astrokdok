@@ -22,31 +22,34 @@ A.GAMES.proxima = () => {
       g.pulses = g.pulses.filter(p => p.y < 150 && !p.done);
     },
     draw(g) {
-      A.cls(0);
+      A.usePal('espaco'); A.cls(0);
       const sp = 20 + g.speed * 2;
-      for (let i = 0; i < 36; i++) { const y = (i * 37 + g.t * sp) % 144; A.rect((i * 53) % 160, y, 1, 1 + Math.floor(g.speed / 25), i % 4 ? 1 : 3); }
-      A.rect(60, 0, 40, 144, 0); A.rect(60, 0, 1, 144, 1); A.rect(99, 0, 1, 144, 1);
-      A.rect(58, LINE - 1, 44, 3, 2);
+      // estrelas passando: azuladas, algumas brancas e ciano
+      for (let i = 0; i < 36; i++) { const y = (i * 37 + g.t * sp) % 144; A.rect((i * 53) % 160, y, 1, 1 + Math.floor(g.speed / 25), i % 4 ? '#4f5fae' : i % 8 ? 3 : '#9fe8ff'); }
+      A.rect(60, 0, 40, 144, '#0e1430'); A.rect(60, 0, 1, 144, '#4f5fae'); A.rect(99, 0, 1, 144, '#4f5fae'); // faixa central
+      A.rect(58, LINE - 1, 44, 3, A.C.amarelo); // linha de acerto
       g.pulses.forEach(p => {
-        if (p.k === 'a') { A.disc(80, p.y, 6, 2); A.disc(80, p.y, 4, 3); A.txt('A', 79, p.y - 2, 0); }
-        else { A.rect(70, p.y - 4, 20, 9, 3); A.txt(p.k === 'left' ? '<<<' : '>>>', 75, p.y - 2, 0); }
+        if (p.k === 'a') { A.disc(80, p.y, 6, '#ff5a5a'); A.disc(80, p.y, 4, '#c81e1e'); A.txt('A', 79, p.y - 2, '#ffffff'); } // botão A vermelho
+        else { A.rect(70, p.y - 4, 20, 9, p.k === 'left' ? A.C.azul : A.C.roxo); A.txt(p.k === 'left' ? '<<<' : '>>>', 75, p.y - 2, '#ffffff'); } // setas azul/roxo
       });
-      if (g.fx > 0) A.rect(78, LINE, 4, 40, 3);
+      if (g.fx > 0) A.rect(78, LINE, 4, 40, '#ff5ab4'); // raio do laser
       A.drawS(A.SHIPS[A.shipLevel()], 120, 60 + Math.round(Math.sin(g.t * 3) * 2), 2);
     },
     top(g) {
-      A.rect(0, 0, 160, 10, 0); A.txt(`TEMPO ${Math.max(0, Math.ceil(g.limit - g.t))}`, 3, 3, g.limit - g.t < 15 ? 3 : 2);
+      A.usePal('ui');
+      A.rect(0, 0, 160, 10, 0); A.txt(`TEMPO ${Math.max(0, Math.ceil(g.limit - g.t))}`, 3, 3, g.limit - g.t < 15 ? '#ff5a5a' : 2);
       A.txt('VEL', 106, 3, 3); A.rect(120, 3, 36, 4, 1); A.rect(120, 3, Math.round(36 * g.speed / 100), 4, 2);
-      A.rect(0, 134, 58, 10, 0); A.txt(`COMBO ${g.combo}`, 3, 136, g.combo > 4 ? 2 : 1);
+      A.rect(0, 134, 58, 10, 0); A.txt(`COMBO ${g.combo}`, 3, 136, g.combo > 4 ? 2 : '#8a90c8');
     },
   });
 };
 
 // ---------- ÓRION: ligar as estrelas na ordem ----------
+// 4º valor = cor real da estrela (sem cor = branca)
 const CONST = [
-  { name: 'ORION', stars: [['BETELGEUSE', 48, 32], ['BELLATRIX', 108, 38], ['MINTAKA', 92, 70], ['ALNILAM', 80, 74], ['ALNITAK', 68, 78], ['SAIPH', 56, 118], ['RIGEL', 112, 114]],
+  { name: 'ORION', stars: [['BETELGEUSE', 48, 32, '#ff7a3a'], ['BELLATRIX', 108, 38], ['MINTAKA', 92, 70], ['ALNILAM', 80, 74], ['ALNITAK', 68, 78], ['SAIPH', 56, 118], ['RIGEL', 112, 114, '#a9d4ff']],
     edges: [[0, 1], [0, 4], [1, 2], [2, 3], [3, 4], [4, 5], [2, 6]] },
-  { name: 'CRUZEIRO DO SUL', stars: [['GACRUX', 80, 28], ['ACRUX', 84, 118], ['MIMOSA', 46, 66], ['DELTA', 116, 60], ['INTROMETIDA', 102, 90]],
+  { name: 'CRUZEIRO DO SUL', stars: [['GACRUX', 80, 28, '#ff8a4a'], ['ACRUX', 84, 118], ['MIMOSA', 46, 66], ['DELTA', 116, 60], ['INTROMETIDA', 102, 90, '#ffc27a']],
     edges: [[0, 1], [2, 3]] },
 ];
 A.GAMES.orion = () => A.game({
@@ -71,25 +74,27 @@ A.GAMES.orion = () => A.game({
   },
   draw(g) {
     const C = CONST[g.ci];
+    A.usePal(['#0b1438', '#34437e', '#7383c8', '#ffffff']); // céu noturno azul-marinho
     A.cls(0); A.drawStars(g.bg, 1);
     C.edges.forEach(([a, b]) => {
       if (a >= g.next || b >= g.next) return;
       const [, x1, y1] = C.stars[a], [, x2, y2] = C.stars[b], n = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-      for (let k = 0; k <= n; k += 2) A.rect(x1 + (x2 - x1) * k / n, y1 + (y2 - y1) * k / n, 1, 1, 2);
+      for (let k = 0; k <= n; k += 2) A.rect(x1 + (x2 - x1) * k / n, y1 + (y2 - y1) * k / n, 1, 1, A.C.ciano);
     });
-    C.stars.forEach(([, x, y], i) => {
+    C.stars.forEach(([, x, y, cor = '#ffffff'], i) => {
       const done = i < g.next;
-      A.disc(x, y, done ? 3 : 2, done ? 2 : 3);
-      if (!done) A.txt(String(i + 1), x + 5, y - 7, i === g.next ? 2 : 1);
+      A.disc(x, y, done ? 3 : 2, cor);
+      if (!done) A.txt(String(i + 1), x + 5, y - 7, i === g.next ? '#ffe14a' : 2);
     });
-    if (g.ci === 0) { A.disc(62, 96, 3, 1); A.rect(61, 95, 2, 2, 3); }
-    const c = 3;
+    if (g.ci === 0) { A.disc(62, 96, 3, '#b04a9a'); A.rect(61, 95, 2, 2, '#ffc0ec'); } // Nebulosa de Órion
+    const c = '#7cff6b'; // mira verde
     A.rect(g.cx - 7, g.cy, 4, 1, c); A.rect(g.cx + 4, g.cy, 4, 1, c); A.rect(g.cx, g.cy - 7, 1, 4, c); A.rect(g.cx, g.cy + 4, 1, 4, c);
   },
   top(g) {
+    A.usePal('ui');
     A.rect(0, 0, 160, 10, 0);
     A.txt(CONST[g.ci].name, 2, 3, 3);
-    A.rect(104, 3, 52, 4, 1); A.rect(104, 3, Math.max(0, Math.round(52 * g.left / g.limit)), 4, g.left < 10 ? 3 : 2);
+    A.rect(104, 3, 52, 4, 1); A.rect(104, 3, Math.max(0, Math.round(52 * g.left / g.limit)), 4, g.left < 10 ? '#ff5a5a' : 2);
     if (g.msgT > 0) A.txtC(g.msg, 134, 2);
   },
 });
@@ -113,19 +118,20 @@ A.GAMES.blackhole = () => {
       g.px = px; g.py = py;
     },
     draw(g) {
-      A.cls(0);
-      for (let i = 0; i < 40; i++) A.rect((i * 53) % 160, (i * 37) % 144, 1, 1, 1);
-      for (let a = 0; a < 6.283; a += 0.03) { A.rect(CX + Math.cos(a) * SAFE1, CY + Math.sin(a) * SAFE1 * 0.8, 1, 1, 1); A.rect(CX + Math.cos(a) * SAFE2, CY + Math.sin(a) * SAFE2 * 0.8, 1, 1, 1); }
-      for (let r = IN - 6; r > 12; r -= 2) for (let a = 0; a < 6.283; a += 0.05) A.rect(CX + Math.cos(a + g.t * 2) * r, CY + Math.sin(a + g.t * 2) * r * 0.3, 1, 1, r % 4 ? 2 : 3);
+      A.usePal('buraco'); A.cls('#0a0820'); // espaço roxo-escuro: o buraco (preto) aparece por cima
+      for (let i = 0; i < 40; i++) A.rect((i * 53) % 160, (i * 37) % 144, 1, 1, '#4a4f80');
+      for (let a = 0; a < 6.283; a += 0.03) { A.rect(CX + Math.cos(a) * SAFE1, CY + Math.sin(a) * SAFE1 * 0.8, 1, 1, '#3fae4b'); A.rect(CX + Math.cos(a) * SAFE2, CY + Math.sin(a) * SAFE2 * 0.8, 1, 1, '#3fae4b'); } // anel seguro verde
+      for (let r = IN - 6; r > 12; r -= 2) for (let a = 0; a < 6.283; a += 0.05) A.rect(CX + Math.cos(a + g.t * 2) * r, CY + Math.sin(a + g.t * 2) * r * 0.3, 1, 1, r % 4 ? 2 : '#ffcc33'); // disco de acreção
       A.disc(CX, CY, 11, 3); A.disc(CX, CY, 10, 0);
-      g.dots.forEach(d => { const x = CX + Math.cos(d.a) * d.r, y = CY + Math.sin(d.a) * d.r * 0.8; A.rect(x - 1, y - 1, 3, 3, 2); A.rect(x, y, 1, 1, 3); });
-      g.ss.forEach(s => { const x = CX + Math.cos(s.a) * s.r, y = CY + Math.sin(s.a) * s.r * 0.8; A.disc(x, y, 3, 3); A.rect(x - 5, y, 11, 1, 2); A.rect(x, y - 5, 1, 11, 2); });
-      if (g.state === 'lose') A.boom(g.px || CX, g.py || CY);
-      else if (A.flick(g) && g.px) { A.disc(g.px, g.py, 4, 0); A.disc(g.px, g.py, 3, 2); A.rect(g.px - 1, g.py - 1, 2, 2, 3); }
+      g.dots.forEach(d => { const x = CX + Math.cos(d.a) * d.r, y = CY + Math.sin(d.a) * d.r * 0.8; A.rect(x - 1, y - 1, 3, 3, A.C.ciano); A.rect(x, y, 1, 1, '#dffcff'); }); // dados
+      g.ss.forEach(s => { const x = CX + Math.cos(s.a) * s.r, y = CY + Math.sin(s.a) * s.r * 0.8; A.disc(x, y, 3, '#bfe0ff'); A.rect(x - 5, y, 11, 1, '#4f8cff'); A.rect(x, y - 5, 1, 11, '#4f8cff'); }); // estrelas S azuis
+      if (g.state === 'lose') A.withPal('fogo', () => A.boom(g.px || CX, g.py || CY));
+      else if (A.flick(g) && g.px) { A.disc(g.px, g.py, 4, '#0e0e0e'); A.disc(g.px, g.py, 3, '#ffffff'); A.rect(g.px - 1, g.py - 1, 2, 2, A.C.amarelo); } // nave branca com detalhe Astrokdok
     },
     top(g) {
+      A.usePal('ui');
       A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`DADOS ${g.got}/${g.need}`, 104, 3, 2);
-      A.rect(0, 134, 160, 10, 0); A.txt(`NA TERRA JA PASSARAM ${Math.floor(g.days / 6)} DIAS`, 4, 136, 1);
+      A.rect(0, 134, 160, 10, 0); A.txt(`NA TERRA JA PASSARAM ${Math.floor(g.days / 6)} DIAS`, 4, 136, '#9aa0c8');
     },
   });
 };

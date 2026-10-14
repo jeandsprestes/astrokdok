@@ -6,14 +6,17 @@ A.titleScene = () => {
   return {
     update(dt) { t += dt; },
     draw() {
+      A.usePal('espaco');
       A.cls(0);
       A.drawStars(st, 3, t * 10);
-      A.txtO('ASTROKDOK', 80 - A.txtW('ASTROKDOK', 2) / 2, 26, 2, 1, 2);
-      A.txtC('VIAGENS ESPACIAIS', 44, 3);
+      A.disc(136, 120, 22, '#1e5bd8'); A.disc(130, 114, 7, '#3fae4b'); A.disc(144, 126, 5, '#3fae4b');
+      A.usePal('brand');
+      A.txtO('ASTROKDOK', 80 - A.txtW('ASTROKDOK', 2) / 2, 26, 2, 0, 2);
+      A.txtC('VIAGENS ESPACIAIS', 44, '#ffffff');
       const y = 66 + Math.round(Math.sin(t * 2) * 3);
       A.drawS(A.FLAME[Math.floor(t * 10) % 2], 74, y + 26, 2);
       A.drawS(A.SHIPS[0], 64, y, 2);
-      if (Math.floor(t * 2) % 2) A.txtC('APERTE A', 118, 2);
+      if (Math.floor(t * 2) % 2) A.txtC('APERTE A', 118, '#ffffff');
     },
   };
 };
@@ -42,11 +45,11 @@ A.intro = async () => {
   const st = A.stars(70);
   let t = 0;
   A.setScene({ update(dt) { t += dt; }, draw() {
-    A.cls(0); A.drawStars(st, 3);
-    A.disc(120, 28, 8, 3); A.disc(123, 26, 7, 0);
-    A.rect(0, 100, 160, 44, 1);
-    for (let i = 0; i < 160; i++) A.rect(i, 84 + Math.round(Math.abs(((i + 30) % 70) - 35) * 0.45), 1, 20, 0);
-    A.rect(60, 104, 26, 18, 2); A.rect(56, 98, 34, 7, 0); A.rect(70, 112, 7, 10, 0); A.rect(64, 108, 4, 4, 3);
+    A.usePal('noite'); A.cls(0); A.drawStars(st, 3);
+    A.disc(120, 28, 8, '#fff6c8'); A.disc(123, 26, 7, 0);
+    A.rect(0, 100, 160, 44, '#1d4a2a');
+    for (let i = 0; i < 160; i++) A.rect(i, 84 + Math.round(Math.abs(((i + 30) % 70) - 35) * 0.45), 1, 20, '#123320');
+    A.rect(60, 104, 26, 18, '#8fb1e8'); A.rect(56, 98, 34, 7, '#a8331f'); A.rect(70, 112, 7, 10, '#5a3417'); A.rect(64, 108, 4, 4, '#ffd34d');
   } });
   A.hud('VALE DO CAPÃO', '');
   await A.fade(0);
@@ -83,8 +86,16 @@ A.boot = async () => {
       if (k === 0 && await A.loadCode(lc)) return;
     }
   }
-  const opts = had ? ['CONTINUAR', 'CARREGAR CÓDIGO', 'NOVO JOGO'] : ['NOVO JOGO', 'CARREGAR CÓDIGO'];
+  const opts = had ? ['CONTINUAR', 'ESCOLHER MISSÃO', 'CARREGAR CÓDIGO', 'NOVO JOGO'] : ['NOVO JOGO', 'ESCOLHER MISSÃO', 'CARREGAR CÓDIGO'];
   const c = opts[await A.choose('', opts)];
+  if (c === 'ESCOLHER MISSÃO') {
+    if (!had) { const mute = A.S.mute; A.S = A.newSave(); A.S.mute = mute; }
+    if (!await A.pickMission()) { A.boot(); return; }
+    if (!had || !A.S.nome) await A.askNames();
+    await A.toBase(4, 5, 'down');
+    await A.missionHello();
+    return;
+  }
   if (c === 'CARREGAR CÓDIGO') {
     const code = await A.enterCode();
     if (!code || !await A.loadCode(code)) A.boot();

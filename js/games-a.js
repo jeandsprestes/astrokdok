@@ -1,6 +1,8 @@
 'use strict';
 // Minijogos: Mercúrio (crepúsculo), Vênus (sonda-balão), Marte (jipe-robô).
-const ROVER = A.spr(['..0000..', '.033330.', '03311330', '00000000', '02.00.20', '.0....0.']);
+// jipe branco, painel azul, rodas escuras
+const ROVER = A.spr(['..0000..', '.033330.', '03311330', '00000000', '02.00.20', '.0....0.'], { 0: '#1a1c24', 1: '#3b7ae0', 2: '#6a6f7a', 3: '#f4f6fa' });
+const HUD_FRIO = '#5ab4ff', HUD_CALOR = '#ff4a3a';
 
 // ---------- MERCÚRIO: ficar na faixa entre o dia e a noite ----------
 A.GAMES.mercury = () => {
@@ -28,21 +30,23 @@ A.GAMES.mercury = () => {
       if (g.t >= g.T) g.win('CREPUSCULO ATRAVESSADO!');
     },
     draw(g) {
+      // frio azul-escuro gelado · crepúsculo roxo/marrom · quente laranja/vermelho
       for (let y = 10; y < 144; y += 2) {
         const b = band(g.t + (115 - y) / 45), l = Math.round(b.c - b.w / 2), r = Math.round(b.c + b.w / 2);
-        A.rect(0, y, l, 2, 0); A.rect(l, y, r - l, 2, 1); A.rect(r, y, 160 - r, 2, 2);
+        A.rect(0, y, l, 2, '#16305e'); A.rect(l, y, r - l, 2, '#6b3f5e'); A.rect(r, y, 160 - r, 2, '#e4581e');
         const k = (y * 7 + Math.floor(g.t * 45)) % 23;
-        if (k < 2) A.rect((y * 13) % Math.max(1, l), y, 1, 1, 3);
-        if (k > 19) A.rect(r + (y * 11) % Math.max(1, 160 - r), y, 2, 1, 3);
+        if (k < 2) A.rect((y * 13) % Math.max(1, l), y, 1, 1, '#bfe6ff');
+        if (k > 19) A.rect(r + (y * 11) % Math.max(1, 160 - r), y, 2, 1, '#ffd040');
       }
-      g.cr.forEach(c => { A.disc(c.x, c.y, c.r, 0); A.disc(c.x, c.y - 1, c.r - 1, 1); A.disc(c.x, c.y, c.r - 2, 0); });
+      g.cr.forEach(c => { A.disc(c.x, c.y, c.r, '#1e1418'); A.disc(c.x, c.y - 1, c.r - 1, '#e07040'); A.disc(c.x, c.y, c.r - 2, '#3a2630'); });
       if (g.state === 'lose') A.boom(g.x + 4, 115); else if (A.flick(g)) A.draw(ROVER, g.x, 112);
     },
     top(g) {
+      A.usePal('ui');
       A.rect(0, 0, 160, 10, 0);
       A.hearts(g.lives, g.maxL, 2, 2);
-      A.txt('FRIO', 34, 3, 3); A.rect(52, 3, 30, 4, 1); A.rect(52, 3, Math.round(30 * g.cold / 100), 4, 3);
-      A.txt('CALOR', 88, 3, 2); A.rect(110, 3, 30, 4, 1); A.rect(110, 3, Math.round(30 * g.hot / 100), 4, 2);
+      A.txt('FRIO', 34, 3, HUD_FRIO); A.rect(52, 3, 30, 4, 1); A.rect(52, 3, Math.round(30 * g.cold / 100), 4, HUD_FRIO);
+      A.txt('CALOR', 88, 3, HUD_CALOR); A.rect(110, 3, 30, 4, 1); A.rect(110, 3, Math.round(30 * g.hot / 100), 4, HUD_CALOR);
       A.rect(0, 141, Math.round(160 * Math.min(1, g.t / g.T)), 3, 2);
     },
   });
@@ -76,22 +80,23 @@ A.GAMES.venus = () => A.game({
     }
   },
   draw(g) {
-    A.cls(2);
-    for (let i = 0; i < 14; i++) A.rect((i * 41 - g.t * 25) % 180 + 160 * (((i * 41 - g.t * 25) % 180) < -20), 20 + (i * 17) % 110, 18, 3, 3);
-    A.rect(0, 134, 160, 10, 1);
+    // céu amarelo-alaranjado, nuvens de ácido verde-amareladas com borda marrom, dados ciano, balão azul
+    A.cls('#f0b048');
+    for (let i = 0; i < 14; i++) A.rect((i * 41 - g.t * 25) % 180 + 160 * (((i * 41 - g.t * 25) % 180) < -20), 20 + (i * 17) % 110, 18, 3, '#fbe2a8');
+    A.rect(0, 134, 160, 10, '#8a4416');
     g.walls.forEach(w => {
-      A.rect(w.x, 12, 14, w.c - w.gap / 2 - 12, 1); A.rect(w.x, w.c + w.gap / 2, 14, 144, 1);
-      A.rect(w.x - 2, w.c - w.gap / 2 - 4, 18, 4, 0); A.rect(w.x - 2, w.c + w.gap / 2, 18, 4, 0);
+      A.rect(w.x, 12, 14, w.c - w.gap / 2 - 12, '#b4c03a'); A.rect(w.x, w.c + w.gap / 2, 14, 144, '#b4c03a');
+      A.rect(w.x - 2, w.c - w.gap / 2 - 4, 18, 4, '#6a4a1a'); A.rect(w.x - 2, w.c + w.gap / 2, 18, 4, '#6a4a1a');
     });
-    g.orbs.forEach(o => { A.disc(o.x, o.y, 3, 0); A.disc(o.x, o.y, 2, 3); });
+    g.orbs.forEach(o => { A.disc(o.x, o.y, 3, '#0a4a5a'); A.disc(o.x, o.y, 2, '#5ff0ff'); });
     if (g.bolt) {
-      if (g.bolt.t < 0.9) { if (Math.floor(g.bolt.t * 10) % 2) { A.rect(0, g.bolt.y - 6, 160, 1, 0); A.rect(0, g.bolt.y + 6, 160, 1, 0); A.txt('!', 150, g.bolt.y - 2, 0); } }
-      else for (let x = 0; x < 160; x += 6) A.rect(x, g.bolt.y - 2 + ((x / 6) % 2) * 3, 6, 3, 3);
+      if (g.bolt.t < 0.9) { if (Math.floor(g.bolt.t * 10) % 2) { A.rect(0, g.bolt.y - 6, 160, 1, '#d02020'); A.rect(0, g.bolt.y + 6, 160, 1, '#d02020'); A.txt('!', 150, g.bolt.y - 2, '#d02020'); } }
+      else for (let x = 0; x < 160; x += 6) A.rect(x, g.bolt.y - 2 + ((x / 6) % 2) * 3, 6, 3, (x / 6) % 2 ? '#fff27a' : '#ffffff');
     }
     if (g.state === 'lose') A.boom(44, g.y);
-    else if (A.flick(g)) { A.disc(44, g.y - 3, 7, 0); A.disc(44, g.y - 3, 6, 3); A.rect(41, g.y - 7, 2, 6, 2); A.rect(43, g.y + 3, 1, 5, 0); A.rect(45, g.y + 3, 1, 5, 0); A.rect(41, g.y + 8, 7, 3, 0); }
+    else if (A.flick(g)) { A.disc(44, g.y - 3, 7, '#1a1a3a'); A.disc(44, g.y - 3, 6, '#3a6ae0'); A.rect(41, g.y - 7, 2, 6, '#ff6a8a'); A.rect(43, g.y + 3, 1, 5, '#3a2a1a'); A.rect(45, g.y + 3, 1, 5, '#3a2a1a'); A.rect(41, g.y + 8, 7, 3, '#7a4a24'); }
   },
-  top(g) { A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`DADOS ${g.got}/${g.need}`, 100, 3, 2); },
+  top(g) { A.usePal('ui'); A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`DADOS ${g.got}/${g.need}`, 100, 3, 2); },
 });
 
 // ---------- MARTE: jipe-robô pulando pedras ----------
@@ -125,17 +130,18 @@ A.GAMES.mars = () => {
       g.dust.forEach(d => { d.x -= d.v * dt; }); g.dust = g.dust.filter(d => d.x > -4);
     },
     draw(g) {
-      A.cls(2);
-      A.disc(130, 26, 4, 3);
+      // céu caramelo-rosado, morros e chão ferrugem, pedras marrons, crateras escuras, gelo azul-claro, poeira laranja
+      A.cls('#e6b08a');
+      A.disc(130, 26, 4, '#fff2d8');
       const off = (g.t * g.sp * 0.3) % 40;
-      for (let i = -1; i < 6; i++) A.disc(i * 40 - off, 100, 18, 1);
-      A.rect(0, GYM, 160, 32, 1);
-      for (let i = 0; i < 12; i++) A.rect((i * 29 - g.t * g.sp) % 180 + (((i * 29 - g.t * g.sp) % 180) < 0 ? 180 : 0), GYM + 4 + (i % 4) * 6, 3, 1, 0);
-      g.obs.forEach(o => { if (o.hole) { A.rect(o.x, GYM, o.w, 10, 0); A.rect(o.x, GYM, o.w, 1, 2); } else { A.rect(o.x, GYM - o.h, o.w, o.h, 0); A.rect(o.x + 1, GYM - o.h + 1, o.w - 3, 2, 1); } });
-      g.ice.forEach(c => { A.rect(c.x - 1, c.y - 3, 3, 7, 3); A.rect(c.x - 3, c.y - 1, 7, 3, 3); A.rect(c.x, c.y, 1, 1, 0); });
-      g.dust.forEach(d => A.rect(d.x, d.y, 3, 1, 3));
+      for (let i = -1; i < 6; i++) A.disc(i * 40 - off, 100, 18, '#c8704a');
+      A.rect(0, GYM, 160, 32, '#a33f1c');
+      for (let i = 0; i < 12; i++) A.rect((i * 29 - g.t * g.sp) % 180 + (((i * 29 - g.t * g.sp) % 180) < 0 ? 180 : 0), GYM + 4 + (i % 4) * 6, 3, 1, '#6a2410');
+      g.obs.forEach(o => { if (o.hole) { A.rect(o.x, GYM, o.w, 10, '#2a0e06'); A.rect(o.x, GYM, o.w, 1, '#e08a5a'); } else { A.rect(o.x, GYM - o.h, o.w, o.h, '#4a2c1c'); A.rect(o.x + 1, GYM - o.h + 1, o.w - 3, 2, '#9a7058'); } });
+      g.ice.forEach(c => { A.rect(c.x - 1, c.y - 3, 3, 7, '#bfefff'); A.rect(c.x - 3, c.y - 1, 7, 3, '#bfefff'); A.rect(c.x, c.y, 1, 1, '#3a8ad0'); });
+      g.dust.forEach(d => A.rect(d.x, d.y, 3, 1, '#d8641e'));
       if (g.state === 'lose') A.boom(29, GYM - 4); else if (A.flick(g)) A.draw(ROVER, 25, GYM - 6 - g.h);
     },
-    top(g) { A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`GELO ${g.got}/${g.need}`, 104, 3, 3); },
+    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`GELO ${g.got}/${g.need}`, 104, 3, 3); },
   });
 };

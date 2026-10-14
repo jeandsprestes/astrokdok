@@ -5,7 +5,7 @@ const OLD_GUIDE = { capao: 'dito', alcantara: 'nara', atacama: 'paz' };
 
 A.siteScene = M => {
   const kind = M.scene;
-  const bg = A.mk(160, 144, x => { A.SITES[kind](x); A.rect(104, GROUND, 44, 4, 0, x); A.rect(106, GROUND, 40, 1, 2, x); });
+  const bg = A.mk(160, 144, x => { A.withPal('ceu', () => A.SITES[kind](x)); A.withPal('brand', () => { A.rect(104, GROUND, 44, 4, 0, x); A.rect(106, GROUND, 40, 1, 2, x); }); });
   const guide = M.site.look ? A.look(M.site.look) : A.CH[OLD_GUIDE[kind]];
   const extra = (M.site.extra || []).map(l => typeof l === 'string' ? A.CH[l] : A.look(l));
   const s = { cd: null, t: 0 };
@@ -17,6 +17,7 @@ A.siteScene = M => {
     A.draw(A.GAB.right[0], 52, GROUND - 14);
     A.draw(A.KDOK, 72, GROUND - 15 + Math.round(Math.sin(s.t * 4)));
     A.drawS(A.SHIPS[A.shipLevel()], 110, GROUND - 32, 2);
+    A.usePal('brand');
     if (s.cd) { A.rect(0, 40, 160, 38, 0); A.rect(0, 41, 160, 1, 2); A.rect(0, 76, 160, 1, 2); A.txtC(s.cd, 47, 2, s.cd.length > 2 ? 3 : 5); }
   };
   return s;
@@ -38,6 +39,16 @@ A.runSite = async M => {
   await A.runLaunch(M, sc);
 };
 
+// PULAR: o botão só vale enquanto um minijogo está rodando (nunca no meio de um diálogo)
+let skipRes = null;
+A.skipArmed = false;
+const armSkip = on => { A.skipArmed = on; A.$('#skipBtn').hidden = !on; };
+A.$('#skipBtn').onclick = async () => {
+  if (!A.skipArmed || A.modal || A.uiOpen() || !A.$('#card').hidden || !A.scene) return;
+  const k = await A.cardChoice('<span class="tag">PULAR JOGO</span><h2>Pular este jogo?</h2><p>A missão conta como cumprida e você ganha o item do mesmo jeito.</p>', ['PULAR ESTE JOGO', 'CONTINUAR JOGANDO']);
+  if (k === 0 && skipRes) { A.sfx('up'); A.setScene(null); skipRes(true); }
+};
+
 A.runLaunch = async (M, sc) => {
   let first = true;
   for (;;) {
@@ -47,10 +58,15 @@ A.runLaunch = async (M, sc) => {
     sc.cd = null;
     await A.fade(1, 200);
     const game = A.GAMES[M.game]();
+    const skip = new Promise(r => { skipRes = r; });
+    armSkip(true);
     await A.fade(0, 200);
-    if (await game) break;
-    const c = await A.choose('A missão falhou... mas todo astronauta erra antes de acertar. Tentar de novo?', ['TENTAR DE NOVO', 'VOLTAR PARA A BASE']);
-    if (c === 1) { await A.toBase(5, 5, 'right'); return; }
+    const won = await Promise.race([game, skip]);
+    armSkip(false); skipRes = null;
+    if (won) break;
+    const c = await A.choose('A missão falhou... mas todo astronauta erra antes de acertar. E agora?', ['TENTAR DE NOVO', 'PULAR ESTE JOGO', 'VOLTAR PARA A BASE']);
+    if (c === 1) break;
+    if (c === 2) { await A.toBase(5, 5, 'right'); return; }
     A.setScene(sc);
     A.hud(M.where.toUpperCase(), `★ ${A.S.stars}`);
   }
@@ -61,21 +77,24 @@ A.debriefScene = body => {
   const st = A.stars(50);
   const gen = A.BODIES[body] && A.BODIES[body]();
   const img = gen ? gen.img : body === 'earth' ? A.bigEarth(44) : body === 'moon' ? A.bigEarth(11) : A.bigSun(70);
+  const radioEarth = A.bigEarth(20);
   const s = { mode: 'body', t: 0 };
   s.update = dt => { s.t += dt; };
   s.draw = () => {
     const t = s.t, ship = A.SHIPS[A.shipLevel()];
+    A.usePal('espaco');
     if (s.mode === 'reward') {
       A.cls(0); A.drawStars(st, 3);
+      A.usePal('brand');
       for (let i = 0; i < 12; i++) { const a = i / 12 * 6.28 + t; A.rect(80 + Math.cos(a) * (40 + Math.sin(t * 3) * 4), 70 + Math.sin(a) * 40, 2, 2, 2); }
       A.drawS(ship, 48, 38, 4);
       return;
     }
     if (s.mode === 'radio') {
       A.cls(0); A.drawStars(st, 3);
-      A.draw(A.bigEarth(20), 58, 90);
-      for (let k = 0; k < 4; k++) { const r = ((t * 30 + k * 12) % 48) + 6; A.rect(80 - r, 80 - r * 0.6, r * 2, 1, k % 2 ? 2 : 3); }
-      A.txtC('RADIO DE CASA', 12, 2);
+      A.draw(radioEarth, 58, 90);
+      for (let k = 0; k < 4; k++) { const r = ((t * 30 + k * 12) % 48) + 6; A.rect(80 - r, 80 - r * 0.6, r * 2, 1, k % 2 ? '#3fc6d6' : '#ffffff'); }
+      A.txtC('RADIO DE CASA', 12, '#f2c200');
       return;
     }
     if (gen) { A.draw(img, 0, 0); A.draw(ship, gen.ship[0], gen.ship[1] + Math.round(Math.sin(t * 3) * 2)); return; }
@@ -83,10 +102,11 @@ A.debriefScene = body => {
     if (body === 'earth') { A.draw(img, 36, 30); A.draw(ship, 10 + (t * 8) % 40, 12); }
     else if (body === 'moon') {
       A.draw(img, 118, 16);
-      for (let i = 0; i < 160; i++) { const y = Math.round(104 + Math.sin(i / 12) * 4 + Math.sin(i / 5) * 1.5); A.rect(i, y, 1, 144 - y, 3); }
-      A.disc(30, 118, 6, 2); A.disc(128, 126, 8, 2);
+      A.usePal('lua');
+      for (let i = 0; i < 160; i++) { const y = Math.round(104 + Math.sin(i / 12) * 4 + Math.sin(i / 5) * 1.5); A.rect(i, y, 1, 144 - y, 3); A.rect(i, y, 1, 1, 2); }
+      A.disc(30, 118, 6, 2); A.disc(128, 126, 8, 2); A.disc(30, 117, 4, 1); A.disc(128, 125, 6, 1);
       A.draw(ship, 64, 88);
-      A.rect(92, 84, 1, 20, 0); A.rect(93, 84, 8, 3, 2); A.rect(93, 87, 8, 3, 0);
+      A.rect(92, 84, 1, 20, '#cccccc'); A.usePal('brand'); A.rect(93, 84, 8, 3, 2); A.rect(93, 87, 8, 3, 0);
     } else {
       A.draw(img, 10, -80);
       A.draw(ship, 72, 104 + Math.round(Math.sin(t * 3) * 2));
@@ -124,7 +144,7 @@ A.episodeEnd = async ep => {
   const st = A.stars(80), last = ep.n === A.EPISODES.length;
   let t = 0;
   A.setScene({ update(dt) { t += dt; }, draw() {
-    A.cls(0); A.drawStars(st, 3, t * 6);
+    A.usePal('espaco'); A.cls(0); A.drawStars(st, 3, t * 6); A.usePal('brand');
     const a = last ? 'VOCE ZEROU' : 'FIM DO', b = last ? 'ASTROKDOK!' : `EPISODIO ${ep.n}`;
     A.txtO(a, 80 - A.txtW(a, 2) / 2, 36, 2, 0, 2); A.txtO(b, 80 - A.txtW(b, 2) / 2, 52, 2, 0, 2);
     A.drawS(A.SHIPS[A.shipLevel()], 64, 76 + Math.round(Math.sin(t * 2) * 3), 2);

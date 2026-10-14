@@ -8,6 +8,9 @@ A.GAMES.sun = () => new Promise(done => {
   let shield = 0, cool = 0, partT = 0.5, flareT = 2, cmeT = 9;
   const parts = [], flares = [];
   const SUN_Y = 26;
+  // cores: espaço escuro, Sol laranja/amarelo, explosões vermelho/laranja, partículas amarelas, escudo ciano
+  const BG = '#100610', SUN = ['#e0560e', '#ffa81c', '#ffc840', '#fff3a0'], FIRE = ['#ff4a1a', '#ff8a1a', '#ffd23a'];
+  const WARN = '#ff3030', SHIELD = '#5ff0ff';
 
   A.hud('MISSÃO 3 · VENTO SOLAR', '◀ ▶ · A ESCUDO');
   A.setScene({
@@ -58,36 +61,37 @@ A.GAMES.sun = () => new Promise(done => {
     draw(ctx) {
       ctx.save();
       if (shake > 0) ctx.translate(A.ri(-2, 2), A.ri(-2, 2));
-      A.cls(0);
-      for (let i = 0; i < 30; i++) A.rect((i * 53) % 160, (i * 71 + t * 20) % 144, 1, 1, 1);
-      // superfície do Sol
+      A.cls(BG);
+      for (let i = 0; i < 30; i++) A.rect((i * 53) % 160, (i * 71 + t * 20) % 144, 1, 1, '#5a2a2a');
+      // superfície do Sol (faixas claras correndo = pulsar)
       for (let x = 0; x < 160; x += 2) {
         const h = SUN_Y + Math.sin(x / 9 + t * 2) * 2 + Math.sin(x / 4 - t * 3);
-        A.rect(x, 0, 2, h, 2); A.rect(x, h - 1, 2, 2, 1);
+        A.rect(x, 0, 2, h, Math.sin(x / 14 - t * 4) > 0.55 ? SUN[2] : SUN[1]); A.rect(x, h - 1, 2, 2, SUN[0]);
       }
-      for (let i = 0; i < 18; i++) A.rect((i * 29 + Math.floor(t * 3) * 7) % 160, (i * 13) % 20 + 2, 2, 1, 3);
+      for (let i = 0; i < 18; i++) A.rect((i * 29 + Math.floor(t * 3) * 7) % 160, (i * 13) % 20 + 2, 2, 1, SUN[3]);
       // explosões
       flares.forEach(f => {
         if (f.warn > 0) {
-          if (Math.floor(f.warn * 10) % 2) { A.rect(f.x, SUN_Y, 1, 118, 2); A.rect(f.x + f.w - 1, SUN_Y, 1, 118, 2); A.txt('!', f.x + f.w / 2 - 1, SUN_Y + 6, 2); }
+          if (Math.floor(f.warn * 10) % 2) { A.rect(f.x, SUN_Y, 1, 118, WARN); A.rect(f.x + f.w - 1, SUN_Y, 1, 118, WARN); A.txt('!', f.x + f.w / 2 - 1, SUN_Y + 6, WARN); }
         } else {
-          A.rect(f.x, SUN_Y - 2, f.w, 146, 2);
-          A.rect(f.x + 3, SUN_Y - 2, f.w - 6, 146, 3);
-          for (let k = 0; k < 6; k++) A.rect(f.x + A.ri(0, f.w - 2), A.ri(SUN_Y, 140), 2, 3, 1);
+          A.rect(f.x, SUN_Y - 2, f.w, 146, FIRE[0]);
+          A.rect(f.x + 3, SUN_Y - 2, f.w - 6, 146, FIRE[1]);
+          for (let k = 0; k < 6; k++) A.rect(f.x + A.ri(0, f.w - 2), A.ri(SUN_Y, 140), 2, 3, FIRE[2]);
         }
       });
-      parts.forEach(p => { A.rect(p.x - 1, p.y - 1, 3, 3, 2); A.rect(p.x, p.y, 1, 1, 3); });
-      if (state === 'lose') for (let k = 0; k < 10; k++) A.disc(pl.x + 8 + A.ri(-9, 9), pl.y + 8 + A.ri(-8, 8), A.ri(1, 4), A.ri(0, 2));
+      parts.forEach(p => { A.rect(p.x - 1, p.y - 1, 3, 3, '#fff04a'); A.rect(p.x, p.y, 1, 1, '#ffffff'); });
+      if (state === 'lose') for (let k = 0; k < 10; k++) A.disc(pl.x + 8 + A.ri(-9, 9), pl.y + 8 + A.ri(-8, 8), A.ri(1, 4), A.pick(A.BOOM));
       else if (inv <= 0 || Math.floor(t * 12) % 2) {
         A.draw(A.FLAME[Math.floor(t * 10) % 2], pl.x + 5, pl.y + 13);
         A.draw(ship, pl.x, pl.y);
-        if (shield > 0) { A.rect(pl.x - 3, pl.y - 4, 22, 2, 3); A.rect(pl.x - 3, pl.y - 4, 2, 8, 3); A.rect(pl.x + 17, pl.y - 4, 2, 8, 3); }
+        if (shield > 0) { A.rect(pl.x - 3, pl.y - 4, 22, 2, SHIELD); A.rect(pl.x - 3, pl.y - 4, 2, 8, SHIELD); A.rect(pl.x + 17, pl.y - 4, 2, 8, SHIELD); }
       }
       ctx.restore();
+      A.usePal('ui'); // HUD
       A.rect(0, 134, 160, 10, 0);
       A.hearts(lives, MAXL, 3, 136);
       A.txt(`AMOSTRAS ${got}/${NEED}`, 44, 136, 2);
-      A.txt(cool <= 0 ? 'ESC OK' : 'ESC ..', 132, 136, cool <= 0 ? 3 : 1);
+      A.txt(cool <= 0 ? 'ESC OK' : 'ESC ..', 132, 136, cool <= 0 ? SHIELD : 1);
       if (state === 'play' && t < 3) { A.rect(0, 64, 160, 13, 0); A.txtC('COLETE AS PARTICULAS', 68, 2); }
       if (state === 'win') { A.rect(0, 60, 160, 13, 0); A.txtC('COLETA COMPLETA!', 64, 2); }
       if (state === 'lose' && endT > 0.6) { A.rect(0, 60, 160, 13, 0); A.txtC('ESCUDOS ESGOTADOS', 64, 2); }

@@ -1,18 +1,21 @@
 'use strict';
 // Minijogo 1: subir pelas camadas da atmosfera desviando de obstáculos.
 A.GAMES = A.GAMES || {};
-const HEART = ['.22.22.', '2222222', '2222222', '.22222.', '..222..', '...2...'];
-const HEARTS = [A.spr(HEART, { 2: 1 }), A.spr(HEART)];
+const HEART = ['.22.22.', '2h22222', '2222222', '.22222.', '..222..', '...2...'];
+// vazio: cinza-escuro · cheio: vermelho com brilho
+const HEARTS = [A.spr(HEART, { 2: '#4a4a58', h: '#4a4a58' }), A.spr(HEART, { 2: '#e8303a', h: '#ffb0b8' })];
 A.hearts = (n, max, x, y) => { for (let i = 0; i < max; i++) A.draw(HEARTS[i < n ? 1 : 0], x + i * 9, y - 1); };
 
 A.GAMES.launch = () => new Promise(done => {
   const ship = A.SHIPS[A.shipLevel()];
+  // pal de cada camada: [0 fundo, 1 riscos de vento, 2 estrela fraca, 3 estrela forte]
   const LAYERS = [
-    { name: 'TROPOSFERA', bg: 3, fg: 0, t: 12, every: 0.95, kinds: ['bird', 'bird', 'plane', 'cloud'], km: [0, 12] },
-    { name: 'ESTRATOSFERA', bg: 2, fg: 0, t: 12, every: 0.8, kinds: ['balloon', 'balloon', 'plane', 'cloud'], km: [12, 50] },
-    { name: 'MESOSFERA', bg: 1, fg: 3, t: 12, every: 0.62, kinds: ['meteor'], km: [50, 80] },
-    { name: 'TERMOSFERA', bg: 0, fg: 3, t: 14, every: 0.55, kinds: ['sat', 'junk', 'junk'], km: [80, 400] },
+    { name: 'TROPOSFERA', pal: ['#7cc2f6', '#d4ecff', '#d4ecff', '#ffffff'], t: 12, every: 0.95, kinds: ['bird', 'bird', 'plane', 'cloud'], km: [0, 12] },
+    { name: 'ESTRATOSFERA', pal: ['#2f6fd6', '#6fa8f0', '#6fa8f0', '#dff0ff'], t: 12, every: 0.8, kinds: ['balloon', 'balloon', 'plane', 'cloud'], km: [12, 50] },
+    { name: 'MESOSFERA', pal: ['#231a5c', '#3b2f8a', '#a89ee8', '#f0ecff'], t: 12, every: 0.62, kinds: ['meteor'], km: [50, 80] },
+    { name: 'TERMOSFERA', pal: ['#05060f', '#1b2350', '#8a90c8', '#ffffff'], t: 14, every: 0.55, kinds: ['sat', 'junk', 'junk'], km: [80, 400] },
   ];
+  const TRAIL = ['#ffd23a', '#ff8a1a', '#d8400e']; // rastro do meteoro
   const pl = { x: 72, y: 112 };
   const stars = A.stars(40);
   let lives = 3, inv = 0, li = 0, lt = 0, spawnT = 1.2, banner = 2.2, state = 'play', endT = 0, shake = 0, t = 0;
@@ -73,21 +76,23 @@ A.GAMES.launch = () => new Promise(done => {
       const L = LAYERS[li];
       ctx.save();
       if (shake > 0) ctx.translate(A.ri(-2, 2), A.ri(-2, 2));
-      A.cls(L.bg);
+      A.usePal(L.pal);
+      A.cls(0);
       if (li >= 2) A.drawStars(stars, li === 2 ? 2 : 3, t * 30);
-      else for (let i = 0; i < 12; i++) A.rect((i * 37) % 160, (i * 53 + t * 90) % 144, 1, 3, L.bg === 3 ? 2 : 1);
+      else for (let i = 0; i < 12; i++) A.rect((i * 37) % 160, (i * 53 + t * 90) % 144, 1, 3, 1);
       objs.filter(o => o.safe).forEach(o => A.draw(o.img, o.x, o.y));
       objs.filter(o => !o.safe).forEach(o => {
         const img = Array.isArray(o.img) ? o.img[Math.floor(t * 6) % 2] : o.img;
-        if (o.kind === 'meteor') for (let k = 1; k < 4; k++) A.rect(o.x + 4 - o.vx * 0.03 * k, o.y + 3 - o.vy * 0.03 * k, 2, 2, k < 2 ? 2 : 1);
+        if (o.kind === 'meteor') for (let k = 1; k < 4; k++) A.rect(o.x + 4 - o.vx * 0.03 * k, o.y + 3 - o.vy * 0.03 * k, 2, 2, TRAIL[k - 1]);
         A.draw(img, o.x, o.y);
       });
       if (state !== 'lose' && (inv <= 0 || Math.floor(t * 12) % 2)) {
         A.draw(A.FLAME[Math.floor(t * 10) % 2], pl.x + 5, pl.y + 13);
         A.draw(ship, pl.x, pl.y);
       }
-      if (state === 'lose') for (let k = 0; k < 8; k++) A.disc(pl.x + 8 + A.ri(-8, 8), pl.y + 8 + A.ri(-8, 8), A.ri(1, 4), A.ri(0, 2));
+      if (state === 'lose') for (let k = 0; k < 8; k++) A.disc(pl.x + 8 + A.ri(-8, 8), pl.y + 8 + A.ri(-8, 8), A.ri(1, 4), A.pick(A.BOOM));
       ctx.restore();
+      A.usePal('ui'); // HUD
       const km = Math.round(L.km[0] + (L.km[1] - L.km[0]) * Math.min(1, lt / L.t));
       A.rect(0, 0, 160, 9, 0);
       A.hearts(lives, 3, 3, 2);

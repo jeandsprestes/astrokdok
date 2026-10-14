@@ -1,9 +1,14 @@
 'use strict';
 // Base Astrokdok, Escola Municipal do Capão, menus (Cosmodex, hangar, rádio).
+// personagens: cabelo, camisa, calça, pele (o Comandante usa o uniforme preto da Astrokdok)
+const H = A.C.cabelo, P = A.C.pele;
 A.CH = {
-  teacher: A.makeChar(1, 3, 1), lia: A.makeChar(1, 3, 0), tomas: A.makeChar(0, 1, 0), bia: A.makeChar(2, 1, 0),
-  caio: A.makeChar(2, 3, 1), rival: A.makeChar(2, 0, 1), cmd: A.makeChar(3, 0, 0), yuki: A.makeChar(0, 2, 0),
-  ze: A.makeChar(3, 1, 0), dito: A.makeChar(3, 1, 1), nara: A.makeChar(0, 3, 0), paz: A.makeChar(1, 2, 0),
+  teacher: A.makeChar(H[1], A.C.rosa, A.C.jeans, P[1]), lia: A.makeChar(H[0], A.C.roxo, A.C.jeans, P[2]),
+  tomas: A.makeChar(H[1], A.C.verde, A.C.marrom, P[0]), bia: A.makeChar(H[4], A.C.laranja, A.C.jeans, P[0]),
+  caio: A.makeChar(H[2], A.C.ciano, '#4a4f5c', P[1]), rival: A.makeChar(H[2], A.C.vermelho, A.C.preto, P[0]),
+  cmd: A.makeChar(H[3], A.C.preto, A.C.preto, P[2]), yuki: A.makeChar(H[0], '#ff8fb8', A.C.azul, P[0]),
+  ze: A.makeChar(H[3], '#a8401e', A.C.jeans, P[3]), dito: A.makeChar(H[3], '#2f6f3a', A.C.marrom, P[2]),
+  nara: A.makeChar(H[0], A.C.branco, A.C.azul, P[3]), paz: A.makeChar(H[1], A.C.laranja, A.C.jeans, P[1]),
 };
 const lookCache = {};
 A.look = l => lookCache[l.join()] || (lookCache[l.join()] = A.makeChar(...l));
@@ -32,11 +37,12 @@ A.baseDef = () => {
   return {
     rows: A.MAPS.base,
     night: !over && M.night,
-    paint(x) { A.txt('ESCOLA MUNICIPAL', 1, 5, 2, 1, x); A.txt('HANGAR', 117, 5, 2, 1, x); },
+    paint(x) { A.txt('ESCOLA MUNICIPAL', 1, 5, '#ffffff', 1, x); A.txt('HANGAR', 117, 5, '#f2c200', 1, x); },
     extra(ctx, t) {
+      A.usePal('brand');
       A.drawS(A.SHIPS[A.shipLevel()], 112, 90, 2);
       if (Math.floor(t * 2) % 2) A.rect(127, 88, 2, 2, 2);
-      if (A.S.m >= 3) { A.rect(150, 44, 1, 20, 0); A.rect(147, 44, 7, 1, 0); if (Math.floor(t * 3) % 2) A.rect(149, 41, 3, 2, 2); }
+      if (A.S.m >= 3) { A.rect(150, 44, 1, 20, 0); A.rect(147, 44, 7, 1, 0); if (Math.floor(t * 3) % 2) A.rect(149, 41, 3, 2, '#e04848'); }
     },
     npcs,
     onStep(x, y, ch) {
@@ -84,7 +90,7 @@ A.schoolDef = () => {
   return {
     rows: A.MAPS[room],
     night: !A.over() && M.night && room === 'patio',
-    extra() { A.txt(A.over() ? 'ESCOLA MUNICIPAL' : `MISSAO ${M.n}: ${M.name}`, 34, 5, 3); },
+    extra() { A.txt(A.over() ? 'ESCOLA MUNICIPAL' : `MISSAO ${M.n}: ${M.name}`, 34, 5, '#ffffff'); },
     npcs,
     onStep(x, y, ch, s) {
       if (ch === 'd' || ch === 'o') return () => A.toBase(2, 3, 'down');
@@ -123,9 +129,10 @@ A.runClass = async () => {
 // ---------- menus ----------
 A.menu = async () => {
   for (;;) {
-    let c = await A.choose(`<b>${A.rank()} {nome}</b><br><b>OBJETIVO:</b> ${A.objective()}`, ['SALVAR JOGO', 'COSMODEX', 'NAVE E ITENS', 'RÁDIO DE CASA', 'MISSÕES DE VERDADE', `SOM: ${A.S.mute ? 'DESLIGADO' : 'LIGADO'}`, 'FECHAR']);
+    let c = await A.choose(`<b>${A.rank()} {nome}</b><br><b>OBJETIVO:</b> ${A.objective()}`, ['SALVAR JOGO', 'ESCOLHER MISSÃO', 'COSMODEX', 'NAVE E ITENS', 'RÁDIO DE CASA', 'MISSÕES DE VERDADE', `SOM: ${A.S.mute ? 'DESLIGADO' : 'LIGADO'}`, 'FECHAR']);
     if (c === 0) { await A.manualSave(); continue; }
-    c--;
+    if (c === 1) { if (await A.pickMission()) { await A.toBase(4, 5, 'down'); await A.missionHello(); break; } continue; }
+    c -= 2;
     if (c === 0) await A.cosmodex();
     else if (c === 1) await A.hangar();
     else if (c === 2) await A.radio();
@@ -143,6 +150,7 @@ A.hangar = () => {
   const prev = A.scene, t0 = performance.now(), lv = A.shipLevel();
   A.setScene({ draw() {
     const t = (performance.now() - t0) / 1000;
+    A.usePal('brand');
     A.cls(1);
     for (let i = 0; i < 160; i += 16) A.rect(i, 0, 1, 144, 0);
     A.rect(0, 112, 160, 32, 0); A.rect(0, 112, 160, 2, 2);
@@ -162,3 +170,29 @@ A.reals = () => {
   const got = A.MISSIONS.slice(0, A.S.m);
   return A.btnWait(`<span class="tag">MISSÕES DE VERDADE</span><h2>Para fazer fora do jogo</h2>` + (got.length ? got.slice().reverse().map(M => `<div class="card"><h3>MISSÃO ${M.n} · ${M.name}</h3>${M.real}</div>`).join('') : '<p>Complete uma missão para receber desafios do mundo real.</p>'), 'FECHAR');
 };
+
+// ---------- escolher a missão ----------
+// Itens, cartas do Cosmodex e aulas das missões anteriores ficam liberados (aulas com 0 estrelas, para revisar).
+A.startAt = i => {
+  const S = A.S;
+  S.m = i; S.step = 0; S.started = true;
+  A.MISSIONS.slice(0, i).forEach(M => {
+    if (!S.items.includes(M.reward.id)) S.items.push(M.reward.id);
+    if (!S.cards.includes(M.card.id)) S.cards.push(M.card.id);
+    [...M.lessons, M.site.lesson].forEach(L => { if (!(L.id in S.lessons)) S.lessons[L.id] = 0; });
+  });
+  S.stars = Object.values(S.lessons).reduce((a, b) => a + b, 0);
+  A.save();
+};
+A.pickMission = async () => {
+  const cur = A.S.started ? A.S.m : -1;
+  const c = await A.choose('Por qual missão você quer começar?', [...A.MISSIONS.map((M, i) => `${M.n} · ${M.name} · ${M.place}${i === cur ? ' (ATUAL)' : ''}`), 'VOLTAR']);
+  if (c >= A.MISSIONS.length) return false;
+  if (A.S.started && c < A.S.m) {
+    const k = await A.choose(`Voltar para a missão ${c + 1}? As missões depois dela vão ter que ser feitas de novo. Seus itens e o Cosmodex continuam.`, ['SIM, VOLTAR', 'NÃO']);
+    if (k === 1) return false;
+  }
+  A.startAt(c);
+  return true;
+};
+A.missionHello = () => A.say({ who: 'KDOK', t: `Bip! Missão ${A.curM().n}: ${A.curM().name}! Primeiro, as aulas na ${A.SCHOOL}. Depois, fale com o Comandante.` });

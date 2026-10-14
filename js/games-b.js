@@ -37,19 +37,24 @@ A.GAMES.asteroids = (o = {}) => A.game({
     g.ship = ship;
   },
   draw(g) {
-    A.cls(0);
+    A.usePal('espaco'); A.cls(0);
     for (let i = 0; i < 30; i++) A.rect((i * 53) % 160, (i * 37 + g.t * 25) % 144, 1, 1, i % 4 ? 1 : 3);
-    g.rocks.forEach(r => { A.disc(r.x, r.y, r.r, 0); A.disc(r.x, r.y, r.r - 1, 1); A.rect(r.x - r.r / 3, r.y - r.r / 3, 2, 2, 2); });
-    g.gems.forEach(c => { A.rect(c.x - 1, c.y - 3, 3, 7, 2); A.rect(c.x - 3, c.y - 1, 7, 3, 2); A.rect(c.x, c.y, 1, 1, 3); });
-    g.shots.forEach(s => A.rect(s.x, s.y, 2, 5, 3));
+    // rochas marrom-acinzentadas, cristais ciano ou verdes, tiros vermelhos
+    g.rocks.forEach(r => { A.disc(r.x, r.y, r.r, '#3b2f28'); A.disc(r.x, r.y, r.r - 1, '#7d6a5c'); A.rect(r.x - r.r / 3, r.y - r.r / 3, 2, 2, '#b8a493'); });
+    g.gems.forEach(c => { const k = Math.floor(c.x) % 2 ? '#3fe6ff' : '#5cf07a'; A.rect(c.x - 1, c.y - 3, 3, 7, k); A.rect(c.x - 3, c.y - 1, 7, 3, k); A.rect(c.x, c.y, 1, 1, '#ffffff'); });
+    g.shots.forEach(s => A.rect(s.x, s.y, 2, 5, '#ff3b30'));
     if (g.state === 'lose') A.boom(g.x + 8, 112);
     else if (A.flick(g)) { A.draw(A.FLAME[Math.floor(g.t * 10) % 2], g.x + 5, 118); A.draw(g.ship || A.SHIPS[0], g.x, 104); }
   },
-  top(g) { A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`CRISTAIS ${g.got}/${g.need}`, 88, 3, 2); },
+  top(g) { A.usePal('ui'); A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`CRISTAIS ${g.got}/${g.need}`, 88, 3, 2); },
 });
 
 // ---------- JÚPITER: repetir a sequência das luas ----------
-const MOONS = { up: ['IO', 80, 22, 523], right: ['EUROPA', 138, 72, 659], down: ['GANIMEDES', 80, 122, 784], left: ['CALISTO', 22, 72, 392] };
+// [nome, x, y, nota, cor apagada, cor acesa]
+const MOONS = {
+  up: ['IO', 80, 22, 523, '#b0701c', '#ffd84a'], right: ['EUROPA', 138, 72, 659, '#9a8f7c', '#fff8e6'],
+  down: ['GANIMEDES', 80, 122, 784, '#7a6858', '#ecd6b8'], left: ['CALISTO', 22, 72, 392, '#4a4a54', '#d8d8e8'],
+};
 const DIRS4 = ['up', 'right', 'down', 'left'];
 A.GAMES.jupiter = (o = {}) => {
   const rounds = o.rounds || [3, 4, 5, 6];
@@ -83,18 +88,19 @@ A.GAMES.jupiter = (o = {}) => {
       }
     },
     draw(g) {
-      A.cls(0);
+      A.usePal('espaco'); A.cls(0);
       for (let i = 0; i < 25; i++) A.rect((i * 53) % 160, (i * 37) % 144, 1, 1, 1);
+      A.usePal('jupiter'); // faixas bege e marrom
       for (let y = -26; y <= 26; y++) { const w = Math.floor(Math.sqrt(26 * 26 - y * y)); A.rect(80 - w, 72 + y, w * 2 + 1, 1, [2, 3, 1, 2, 3, 2][Math.floor((y + 26) / 9)]); }
-      A.disc(88, 80, 4, 1);
+      A.disc(88, 80, 4, '#c4432a'); // Grande Mancha Vermelha
       for (const d of DIRS4) {
-        const [name, x, y] = MOONS[d], on = g.lit === d;
-        A.disc(x, y, on ? 9 : 7, 0); A.disc(x, y, on ? 8 : 6, on ? 3 : 1);
-        A.txt(name, Math.max(1, Math.min(159 - A.txtW(name), x - A.txtW(name) / 2)), y + (d === 'down' ? -18 : 11), on ? 3 : 2);
+        const [name, x, y, , dim, lit] = MOONS[d], on = g.lit === d;
+        A.disc(x, y, on ? 9 : 7, on ? '#ffffff' : '#141420'); A.disc(x, y, on ? 8 : 6, on ? lit : dim);
+        A.txt(name, Math.max(1, Math.min(159 - A.txtW(name), x - A.txtW(name) / 2)), y + (d === 'down' ? -18 : 11), on ? lit : '#8a90c8');
       }
     },
     top(g) {
-      A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2);
+      A.usePal('ui'); A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2);
       A.txt(`RODADA ${g.r + 1}/${rounds.length}`, 50, 3, 3);
       if (g.state === 'play') A.txt(g.phase === 'show' ? 'OLHE' : 'SUA VEZ', 124, 3, g.phase === 'show' ? 3 : 2);
     },
@@ -130,12 +136,12 @@ A.GAMES.saturn = () => {
       }
     },
     draw(g) {
-      A.cls(0);
-      A.rect(0, TOP - 16 + 4, 160, 12, 2); A.txtC('DIVISAO DE CASSINI', TOP - 9, 0);
+      A.usePal('espaco'); A.cls(0);
+      A.rect(0, TOP - 16 + 4, 160, 12, '#4fd2e6'); A.txtC('DIVISAO DE CASSINI', TOP - 9, '#0b1e4a'); // a chegada, em destaque
       g.lanes.forEach((l, i) => {
         const y = TOP + i * H;
-        A.rect(0, y, 160, H, 1); A.rect(0, y, 160, 1, 0);
-        l.chunks.forEach(c => { A.rect(c.x, y + 3, c.w, H - 6, 3); A.rect(c.x + 2, y + 4, c.w - 4, 2, 2); });
+        A.rect(0, y, 160, H, i % 2 ? '#97805e' : '#b08a42'); A.rect(0, y, 160, 1, '#4a3410'); // faixas bege e dourada alternadas
+        l.chunks.forEach(c => { A.rect(c.x, y + 3, c.w, H - 6, '#eef8ff'); A.rect(c.x + 2, y + 4, c.w - 4, 2, '#8cc6ee'); }); // gelo
       });
       A.rect(0, TOP + LANES * H, 160, 144, 0);
       for (let i = 0; i < 20; i++) A.rect((i * 41) % 160, TOP + LANES * H + 4 + (i * 7) % 18, 1, 1, 2);
@@ -143,6 +149,6 @@ A.GAMES.saturn = () => {
       if (g.state === 'lose') A.boom(g.cx * 16 + 8, y + 8);
       else if (A.flick(g)) A.draw(A.SHIPS[A.shipLevel()], g.cx * 16, y);
     },
-    top(g) { A.rect(0, 0, 160, 8, 0); A.hearts(g.lives, g.maxL, 2, 1); A.txt(`TRAVESSIAS ${g.cross}/3`, 96, 2, 3); },
+    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 8, 0); A.hearts(g.lives, g.maxL, 2, 1); A.txt(`TRAVESSIAS ${g.cross}/3`, 96, 2, 3); },
   });
 };

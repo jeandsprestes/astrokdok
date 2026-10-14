@@ -1,10 +1,12 @@
 'use strict';
 // Base comum dos minijogos: vidas, vitória/derrota, tremida, faixas de aviso.
 // o = { hud, keys, lives, intro, init(g), update(g, dt), draw(g, ctx), top(g), onEnd(g, dt) }
-A.banner = (s, y = 64, p = 2) => { A.rect(0, y - 4, 160, 13, 0); A.txtC(s, y, p); };
+// faixa de aviso: barra preta com texto amarelo (cores da Astrokdok)
+A.banner = (s, y = 64, p = 2) => A.withPal('ui', () => { A.rect(0, y - 4, 160, 13, 0); A.txtC(s, y, p); });
 A.lifeBonus = id => A.has(id) ? 1 : 0;
 A.flick = g => g.inv <= 0 || Math.floor(g.t * 12) % 2;
-A.boom = (x, y) => { for (let k = 0; k < 8; k++) A.disc(x + A.ri(-8, 8), y + A.ri(-8, 8), A.ri(1, 4), A.ri(0, 2)); };
+A.BOOM = ['#c8200a', '#ff6a1a', '#ffc83a']; // explosão: vermelho, laranja, amarelo
+A.boom = (x, y) => { for (let k = 0; k < 8; k++) A.disc(x + A.ri(-8, 8), y + A.ri(-8, 8), A.ri(1, 4), A.pick(A.BOOM)); };
 
 A.game = o => new Promise(done => {
   const g = { t: 0, state: 'play', endT: 0, shake: 0, inv: 0, lives: o.lives || 3, msg: '' };
@@ -37,6 +39,7 @@ A.game = o => new Promise(done => {
       if (g.shake > 0) ctx.translate(A.ri(-2, 2), A.ri(-2, 2));
       o.draw(g, ctx);
       ctx.restore();
+      A.usePal('ui'); // HUD: barra preta, texto amarelo/branco
       if (o.top) o.top(g);
       if (g.state === 'play' && o.intro && g.t < 2.6) A.banner(o.intro);
       if (g.state !== 'play' && g.endT > 0.4) A.banner(g.msg);

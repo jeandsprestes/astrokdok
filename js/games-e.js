@@ -22,18 +22,19 @@ A.GAMES.magellan = () => {
       }
     },
     draw(g) {
-      A.cls(0);
-      for (let i = 0; i < 50; i++) A.rect((i * 53) % 160, (i * 37) % 100, 1, 1, i % 6 ? 1 : 3);
+      A.usePal('noite'); A.cls('#0a1438'); // céu noturno
+      for (let i = 0; i < 50; i++) A.rect((i * 53) % 160, (i * 37) % 100, 1, 1, i % 6 ? '#5a6ab0' : 3);
       const tilt = Math.sin(g.t * 2.3) * 2;
-      for (let x = 0; x < 160; x++) { const y = Math.round(PY + (x - 80) * tilt / 80); A.rect(x, y, 1, 144 - y, 1); if ((x + Math.floor(g.t * 20)) % 9 === 0) A.rect(x, y + 4, 3, 1, 2); }
-      for (let a = 0; a <= 90; a += 10) { const [x, y] = pt(a); A.rect(x, y, 2, 2, 1); }
+      for (let x = 0; x < 160; x++) { const y = Math.round(PY + (x - 80) * tilt / 80); A.rect(x, y, 1, 144 - y, '#0f4f8c'); if ((x + Math.floor(g.t * 20)) % 9 === 0) A.rect(x, y + 4, 3, 1, '#7fc4f0'); } // mar e espuma
+      for (let a = 0; a <= 90; a += 10) { const [x, y] = pt(a); A.rect(x, y, 2, 2, '#c9a24a'); } // marcas de graus
       const [sx, sy] = pt(g.T);
-      A.disc(sx, sy, 3, 3); A.rect(sx - 6, sy, 13, 1, 2); A.rect(sx, sy - 6, 1, 13, 2);
+      A.disc(sx, sy, 3, '#ffffff'); A.rect(sx - 6, sy, 13, 1, '#9fd0ff'); A.rect(sx, sy - 6, 1, 13, '#9fd0ff'); // estrela-guia
       const sh = g.shown == null ? g.p : g.shown;
-      for (let k = 0; k < R; k += 2) { const a = sh * Math.PI / 180; A.rect(PX + Math.cos(a) * k, PY - Math.sin(a) * k, 1, 1, 2); }
-      A.disc(PX, PY, 5, 2); A.disc(PX, PY, 3, 0);
+      for (let k = 0; k < R; k += 2) { const a = sh * Math.PI / 180; A.rect(PX + Math.cos(a) * k, PY - Math.sin(a) * k, 1, 1, '#ffcc33'); } // ponteiro dourado
+      A.disc(PX, PY, 5, '#e0a82a'); A.disc(PX, PY, 3, '#3a2408');
     },
     top(g) {
+      A.usePal('ui');
       A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2);
       A.txt(`MEDIDAS ${g.ok}/${g.need}`, 96, 3, 3);
       A.rect(0, 134, 160, 10, 0);
@@ -84,24 +85,25 @@ A.GAMES.andromeda = () => {
       });
     },
     draw(g) {
-      A.cls(0);
+      A.usePal('nebulosa'); A.cls('#0a0616');
       MAZE.forEach((r, y) => [...r].forEach((c, x) => {
         const X = x * 16, Y = 16 + y * 16;
-        if (c === '#') { A.rect(X, Y, 16, 16, 1); A.rect(X + 2, Y + 2, 12, 12, 0); for (let i = 0; i < 3; i++) A.rect(X + 3 + i * 4, Y + 4 + (i % 2) * 6, 1, 1, 2); }
-        else if (g.dots.has(x + ',' + y)) { A.rect(X + 7, Y + 6, 2, 4, 3); A.rect(X + 6, Y + 7, 4, 2, 3); }
+        // paredes de nebulosa (roxo/azul com brilhos rosa)
+        if (c === '#') { A.rect(X, Y, 16, 16, '#7a5ae0'); A.rect(X + 2, Y + 2, 12, 12, '#2a1456'); for (let i = 0; i < 3; i++) A.rect(X + 3 + i * 4, Y + 4 + (i % 2) * 6, 1, 1, '#ff8ad8'); }
+        else if (g.dots.has(x + ',' + y)) { const cor = (x + y) % 2 ? '#ffe14a' : '#ffffff'; A.rect(X + 7, Y + 6, 2, 4, cor); A.rect(X + 6, Y + 7, 4, 2, cor); } // estrelinhas
       }));
-      g.h.forEach(h => { const X = h.fx * 16 + 8, Y = 16 + h.fy * 16 + 8; for (let r = 7; r > 4; r--) A.disc(X, Y, r, r % 2 ? 2 : 1); A.disc(X, Y, 4, 0); });
-      if (g.state === 'lose') A.boom(g.p.fx * 16 + 8, 16 + g.p.fy * 16 + 8);
+      g.h.forEach(h => { const X = h.fx * 16 + 8, Y = 16 + h.fy * 16 + 8; for (let r = 7; r > 4; r--) A.disc(X, Y, r, r % 2 ? '#ff8c1a' : '#7a2a00'); A.disc(X, Y, 4, '#000000'); }); // buracos negros
+      if (g.state === 'lose') A.withPal('fogo', () => A.boom(g.p.fx * 16 + 8, 16 + g.p.fy * 16 + 8));
       else if (A.flick(g)) A.draw(A.GAB[g.p.d || 'down'][Math.floor(g.t * 8) % 4], g.p.fx * 16, 16 + g.p.fy * 16 - 2);
     },
-    top(g) { A.rect(0, 0, 160, 16, 0); A.hearts(g.lives, g.maxL, 2, 5); A.txt(`ESTRELAS ${g.total - g.dots.size}/${g.total}`, 84, 6, 3); },
+    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 16, 0); A.hearts(g.lives, g.maxL, 2, 5); A.txt(`ESTRELAS ${g.total - g.dots.size}/${g.total}`, 84, 6, 3); },
   });
 };
 
 // ---------- FINAL: três etapas e a sintonia do sinal ----------
 A.GAMES.tune = () => A.game({
   hud: 'FINAL 3/3 · SINTONIA', keys: '◀ ▶ GIRA · A TRAVA', lives: 1, intro: 'SINTONIZE O SINAL',
-  init(g) { g.f = 5; g.goal = [A.ri(25, 45), A.ri(55, 75), A.ri(82, 96)]; g.goal.sort(() => Math.random() - 0.5); g.k = 0; g.img = A.BODIES.cmb().img; g.msg = ''; g.msgT = 0; },
+  init(g) { g.f = 5; g.goal = [A.ri(25, 45), A.ri(55, 75), A.ri(82, 96)]; g.goal.sort(() => Math.random() - 0.5); g.k = 0; g.img = A.withPal('fundo', () => A.BODIES.cmb().img); g.msg = ''; g.msgT = 0; },
   update(g, dt) {
     g.msgT -= dt;
     g.f = A.clamp(g.f + ((A.K.right ? 1 : 0) - (A.K.left ? 1 : 0)) * 20 * dt, 0, 100);
@@ -113,20 +115,22 @@ A.GAMES.tune = () => A.game({
     }
   },
   draw(g) {
-    A.cls(0);
+    A.usePal('fundo'); A.cls('#05060f');
     const show = Math.min(3, g.k);
     A.ctx.save(); A.ctx.beginPath(); A.ctx.rect(0, 12, 160 * show / 3, 104); A.ctx.clip(); A.draw(g.img, 0, 0); A.ctx.restore();
     const n = g.state === 'win' ? 0 : Math.floor(40 + (g.dist || 0) * 12);
-    for (let i = 0; i < n; i++) A.rect(Math.random() * 160, 12 + Math.random() * 104, 1, 1, A.ri(1, 3));
-    A.rect(0, 118, 160, 26, 0);
-    A.rect(8, 124, 144, 3, 1);
-    for (let i = 0; i <= 10; i++) A.rect(8 + i * 14.4, 122, 1, 7, 1);
-    A.rect(8 + g.f * 1.44 - 1, 119, 3, 11, 2);
+    const NZ = ['#1e4fd8', '#f0a020', '#d02020', '#3fc6d6', '#8e5bd6', '#7ccf5a', '#ffffff']; // chiado colorido
+    for (let i = 0; i < n; i++) A.rect(Math.random() * 160, 12 + Math.random() * 104, 1, 1, A.pick(NZ));
+    // painel do rádio: madeira, escala creme, ponteiro vermelho, sinal verde
+    A.rect(0, 118, 160, 26, '#2b1a0e');
+    A.rect(8, 124, 144, 3, '#f1d3a1');
+    for (let i = 0; i <= 10; i++) A.rect(8 + i * 14.4, 122, 1, 7, '#f1d3a1');
+    A.rect(8 + g.f * 1.44 - 1, 119, 3, 11, '#ff3a2a');
     const bars = g.state === 'win' ? 5 : Math.max(0, 5 - Math.floor((g.dist || 99) / 7));
-    for (let i = 0; i < 5; i++) A.rect(120 + i * 6, 140 - i * 2 - 2, 4, i * 2 + 2, i < bars ? 2 : 1);
-    A.txt(`${Math.round(88 + g.f * 0.2)}.${Math.round(g.f * 7) % 10} MHZ`, 8, 134, 3);
+    for (let i = 0; i < 5; i++) A.rect(120 + i * 6, 140 - i * 2 - 2, 4, i * 2 + 2, i < bars ? '#5ad15a' : '#5a3a24');
+    A.txt(`${Math.round(88 + g.f * 0.2)}.${Math.round(g.f * 7) % 10} MHZ`, 8, 134, '#ffe9b0');
   },
-  top(g) { A.rect(0, 0, 160, 11, 0); A.txt(`FAIXAS ${g.k}/3`, 4, 3, 3); if (g.msgT > 0) A.txt(g.msg, 56, 3, 2); },
+  top(g) { A.usePal('ui'); A.rect(0, 0, 160, 11, 0); A.txt(`FAIXAS ${g.k}/3`, 4, 3, 3); if (g.msgT > 0) A.txt(g.msg, 56, 3, 2); },
 });
 A.GAMES.final = async () => {
   if (!await A.GAMES.asteroids({ need: 8, hud: 'FINAL 1/3 · ASTEROIDES' })) return false;
