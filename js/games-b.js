@@ -1,0 +1,157 @@
+'use strict';
+// Minijogos: Asteroides (mineração), Júpiter (sequência das luas), Saturno (travessia dos anéis).
+
+// ---------- ASTEROIDES: atirar, partir pedras e pegar cristais ----------
+A.GAMES.asteroids = (o = {}) => A.game({
+  hud: o.hud || 'MISSÃO 7 · MINERAÇÃO', keys: '◀ ▶ · A ATIRA', lives: 5 + A.lifeBonus('broca'), intro: 'A PARA ATIRAR',
+  init(g) { g.x = 72; g.shots = []; g.rocks = []; g.gems = []; g.got = 0; g.need = o.need || 10; g.cool = 0; g.rt = 0.5; },
+  update(g, dt) {
+    const ship = A.SHIPS[A.shipLevel()];
+    if (A.K.left) g.x -= 85 * dt;
+    if (A.K.right) g.x += 85 * dt;
+    g.x = A.clamp(g.x, 0, 144);
+    g.cool -= dt;
+    if (A.K.a && g.cool <= 0) { g.shots.push({ x: g.x + 7, y: 108 }); g.cool = 0.2; A.tone(1400, 0.03); }
+    g.rt -= dt;
+    // pedras lentas e espaçadas: criança de 10 a 13 anos vence na 1ª ou 2ª tentativa
+    if (g.rt <= 0) { g.rt = Math.max(1, 1.7 - g.t * 0.01); g.rocks.push({ x: A.rnd(10, 150), y: -12, r: A.pick([10, 10, 6]), vx: A.rnd(-6, 6), vy: A.rnd(12, 22) }); }
+    g.shots.forEach(s => { s.y -= 160 * dt; }); g.shots = g.shots.filter(s => s.y > -5);
+    for (let i = g.rocks.length - 1; i >= 0; i--) {
+      const r = g.rocks[i];
+      r.x += r.vx * dt; r.y += r.vy * dt;
+      if (r.x < r.r || r.x > 160 - r.r) r.vx *= -1;
+      const hit = g.shots.findIndex(s => Math.abs(s.x - r.x) < r.r && Math.abs(s.y - r.y) < r.r);
+      if (hit >= 0) {
+        g.shots.splice(hit, 1); g.rocks.splice(i, 1); A.sfx('hit');
+        if (r.r > 3) { const nr = r.r > 6 ? 6 : 3; g.rocks.push({ x: r.x, y: r.y, r: nr, vx: -12, vy: r.vy }, { x: r.x, y: r.y, r: nr, vx: 12, vy: r.vy }); }
+        if (Math.random() < 0.8) g.gems.push({ x: r.x, y: r.y });
+        continue;
+      }
+      if (r.y > 150) { g.rocks.splice(i, 1); continue; }
+      // só o miolo da nave bate; depois do dano, 2 s sem levar outro
+      if (Math.abs(r.x - (g.x + 8)) < r.r + 1 && Math.abs(r.y - 114) < r.r + 2) { g.rocks.splice(i, 1); if (g.hurt()) g.inv = 2; }
+    }
+    for (let i = g.gems.length - 1; i >= 0; i--) {
+      const c = g.gems[i]; c.y += 26 * dt;
+      if (Math.abs(c.x - (g.x + 8)) < 11 && Math.abs(c.y - 112) < 11) { g.gems.splice(i, 1); g.got++; A.sfx('coin'); if (g.got >= g.need) g.win('AMOSTRAS COLETADAS!'); }
+      else if (c.y > 150) g.gems.splice(i, 1);
+    }
+    g.ship = ship;
+  },
+  draw(g) {
+    A.usePal('espaco'); A.cls(0);
+    for (let i = 0; i < 30; i++) A.rect((i * 53) % 160, (i * 37 + g.t * 25) % 144, 1, 1, i % 4 ? 1 : 3);
+    // rochas marrom-acinzentadas, cristais ciano ou verdes, tiros vermelhos
+    g.rocks.forEach(r => { A.disc(r.x, r.y, r.r, '#3b2f28'); A.disc(r.x, r.y, r.r - 1, '#7d6a5c'); A.rect(r.x - r.r / 3, r.y - r.r / 3, 2, 2, '#b8a493'); });
+    g.gems.forEach(c => { const k = Math.floor(c.x) % 2 ? '#3fe6ff' : '#5cf07a'; A.rect(c.x - 1, c.y - 3, 3, 7, k); A.rect(c.x - 3, c.y - 1, 7, 3, k); A.rect(c.x, c.y, 1, 1, '#ffffff'); });
+    g.shots.forEach(s => A.rect(s.x, s.y, 2, 5, '#ff3b30'));
+    if (g.state === 'lose') A.boom(g.x + 8, 112);
+    else if (A.flick(g)) { A.draw(A.FLAME[Math.floor(g.t * 10) % 2], g.x + 5, 118); A.draw(g.ship || A.SHIPS[0], g.x, 104); }
+  },
+  top(g) { A.usePal('ui'); A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2); A.txt(`CRISTAIS ${g.got}/${g.need}`, 88, 3, 2); },
+});
+
+// ---------- JÚPITER: repetir a sequência das luas ----------
+// [nome, x, y, nota, cor apagada, cor acesa]
+const MOONS = {
+  up: ['IO', 80, 22, 523, '#b0701c', '#ffd84a'], right: ['EUROPA', 138, 72, 659, '#9a8f7c', '#fff8e6'],
+  down: ['GANIMEDES', 80, 122, 784, '#7a6858', '#ecd6b8'], left: ['CALISTO', 22, 72, 392, '#4a4a54', '#d8d8e8'],
+};
+const DIRS4 = ['up', 'right', 'down', 'left'];
+A.GAMES.jupiter = (o = {}) => {
+  const rounds = o.rounds || [2, 3, 4, 5]; // sequências curtas: começa com 2 luas
+  return A.game({
+    hud: o.hud || 'MISSÃO 8 · LUAS DE GALILEU', keys: 'REPITA COM ▲▶▼◀', lives: 5 + A.lifeBonus('escudo-rad'), intro: 'OBSERVE A SEQUENCIA',
+    init(g) { g.seq = []; g.r = 0; while (g.seq.length < rounds[0]) g.seq.push(A.pick(DIRS4)); g.phase = 'show'; g.i = 0; g.pt = -1.4; g.lit = null; g.litT = 0; },
+    update(g, dt) {
+      g.litT -= dt; if (g.litT <= 0) g.lit = null;
+      if (g.phase === 'show') {
+        g.pt += dt;
+        if (g.pt >= 0.9) { // mostra devagar: cada lua acesa por 0,6 s
+          g.pt = 0;
+          if (g.i < g.seq.length) { g.lit = g.seq[g.i]; g.litT = 0.6; A.tone(MOONS[g.lit][3], 0.4); g.i++; }
+          else { g.phase = 'input'; g.i = 0; }
+        }
+        return;
+      }
+      for (const d of DIRS4) {
+        if (!A.hit(d)) continue;
+        g.lit = d; g.litT = 0.25; A.tone(MOONS[d][3], 0.18);
+        if (d === g.seq[g.i]) {
+          g.i++;
+          if (g.i >= g.seq.length) {
+            g.r++;
+            if (g.r >= rounds.length) { g.win('LUAS REGISTRADAS!'); return; }
+            while (g.seq.length < rounds[g.r]) g.seq.push(A.pick(DIRS4));
+            g.phase = 'show'; g.i = 0; g.pt = -1; A.sfx('ok');
+          }
+        } else { g.hurt(); g.phase = 'show'; g.i = 0; g.pt = -1.2; }
+        break;
+      }
+    },
+    draw(g) {
+      A.usePal('espaco'); A.cls(0);
+      for (let i = 0; i < 25; i++) A.rect((i * 53) % 160, (i * 37) % 144, 1, 1, 1);
+      A.usePal('jupiter'); // faixas bege e marrom
+      for (let y = -26; y <= 26; y++) { const w = Math.floor(Math.sqrt(26 * 26 - y * y)); A.rect(80 - w, 72 + y, w * 2 + 1, 1, [2, 3, 1, 2, 3, 2][Math.floor((y + 26) / 9)]); }
+      A.disc(88, 80, 4, '#c4432a'); // Grande Mancha Vermelha
+      for (const d of DIRS4) {
+        const [name, x, y, , dim, lit] = MOONS[d], on = g.lit === d;
+        A.disc(x, y, on ? 9 : 7, on ? '#ffffff' : '#141420'); A.disc(x, y, on ? 8 : 6, on ? lit : dim);
+        A.txt(name, Math.max(1, Math.min(159 - A.txtW(name), x - A.txtW(name) / 2)), y + (d === 'down' ? -18 : 11), on ? lit : '#8a90c8');
+      }
+    },
+    top(g) {
+      A.usePal('ui'); A.rect(0, 0, 160, 10, 0); A.hearts(g.lives, g.maxL, 2, 2);
+      A.txt(`RODADA ${g.r + 1}/${rounds.length}`, 50, 3, 3);
+      if (g.state === 'play') A.txt(g.phase === 'show' ? 'OLHE' : 'SUA VEZ', 124, 3, g.phase === 'show' ? 3 : 2);
+    },
+  });
+};
+
+// ---------- SATURNO: atravessar as faixas dos anéis ----------
+A.GAMES.saturn = () => {
+  const LANES = 6, TOP = 20, H = 16;
+  const mk = k => Array.from({ length: LANES }, (_, i) => {
+    // gelo lento e pedaços menores; cada travessia acelera só 12%
+    const dir = i % 2 ? 1 : -1, sp = (14 + ((i * 7) % 5) * 5) * (1 + k * 0.12), n = 3, chunks = [];
+    for (let j = 0; j < n; j++) chunks.push({ x: j * (180 / n) + A.rnd(0, 20), w: A.ri(14, 24) });
+    return { dir, sp, chunks };
+  });
+  return A.game({
+    hud: 'MISSÃO 9 · ANÉIS', keys: '▲ ▼ ◀ ▶ MOVER', lives: 5 + A.lifeBonus('radar'), intro: 'CHEGUE AO TOPO 3 VEZES',
+    init(g) { g.cx = 5; g.cy = LANES + 1; g.cross = 0; g.lanes = mk(0); g.mc = 0; },
+    update(g, dt) {
+      g.lanes.forEach(l => l.chunks.forEach(c => { c.x += l.dir * l.sp * dt; if (c.x > 180) c.x -= 200; if (c.x < -40) c.x += 200; }));
+      g.mc -= dt;
+      if (g.mc <= 0) {
+        const d = ['up', 'down', 'left', 'right'].find(k => A.K[k]);
+        if (d) {
+          g.mc = 0.17; A.sfx('step');
+          if (d === 'up') g.cy--; if (d === 'down') g.cy = Math.min(LANES + 1, g.cy + 1);
+          if (d === 'left') g.cx = Math.max(0, g.cx - 1); if (d === 'right') g.cx = Math.min(9, g.cx + 1);
+          if (g.cy < 1) { g.cross++; A.sfx('up'); if (g.cross >= 3) { g.win('ANEIS ATRAVESSADOS!'); return; } g.cy = LANES + 1; g.lanes = mk(g.cross); }
+        }
+      }
+      if (g.cy >= 1 && g.cy <= LANES) {
+        const l = g.lanes[g.cy - 1], px = g.cx * 16 + 3;
+        if (l.chunks.some(c => px + 8 > c.x && px + 2 < c.x + c.w) && g.hurt()) { g.cy = LANES + 1; } // bate só o miolo (2 px de folga de cada lado)
+      }
+    },
+    draw(g) {
+      A.usePal('espaco'); A.cls(0);
+      A.rect(0, TOP - 16 + 4, 160, 12, '#4fd2e6'); A.txtC('DIVISAO DE CASSINI', TOP - 9, '#0b1e4a'); // a chegada, em destaque
+      g.lanes.forEach((l, i) => {
+        const y = TOP + i * H;
+        A.rect(0, y, 160, H, i % 2 ? '#97805e' : '#b08a42'); A.rect(0, y, 160, 1, '#4a3410'); // faixas bege e dourada alternadas
+        l.chunks.forEach(c => { A.rect(c.x, y + 3, c.w, H - 6, '#eef8ff'); A.rect(c.x + 2, y + 4, c.w - 4, 2, '#8cc6ee'); }); // gelo
+      });
+      A.rect(0, TOP + LANES * H, 160, 144, 0);
+      for (let i = 0; i < 20; i++) A.rect((i * 41) % 160, TOP + LANES * H + 4 + (i * 7) % 18, 1, 1, 2);
+      const y = g.cy === 0 ? TOP - 14 : TOP + (g.cy - 1) * H;
+      if (g.state === 'lose') A.boom(g.cx * 16 + 8, y + 8);
+      else if (A.flick(g)) A.draw(A.SHIPS[A.shipLevel()], g.cx * 16, y);
+    },
+    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 8, 0); A.hearts(g.lives, g.maxL, 2, 1); A.txt(`TRAVESSIAS ${g.cross}/3`, 96, 2, 3); },
+  });
+};
