@@ -93,7 +93,7 @@ Morri de rir com o Kdok.</div>
   },
 
   gameIntro: [
-    { who: 'KDOK', t: 'Bip! Dentro de Andrômeda, as estrelas formam corredores. Recolha a luz de TODAS as estrelinhas.' },
+    { who: 'KDOK', t: 'Bip! Dentro de Andrômeda, as estrelas formam corredores. Recolha a luz de 40 estrelinhas.' },
     { who: 'KDOK', t: 'Ande com ▲ ▼ ◀ ▶. Os dois buracos negros vagam pelos corredores: não deixe eles te pegarem!' },
   ],
 

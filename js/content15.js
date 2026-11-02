@@ -16,7 +16,7 @@ A.MISSIONS[14] = {
     'Good morning, turma! Hoje é INGLÊS: vamos comparar coisas do espaço. Bigger, smaller, the biggest!',
     'Agora, a aula de ASTRONOMIA da missão de {nome}: um BURACO NEGRO, o lugar de onde nem a luz escapa!',
   ],
-  after: 'Muito bem, {nome}! Lá em cima, você e {rival} cuidam um do outro, viu?',
+  after: 'Muito bem, {nome}! Lá em cima, você e {rival} se cuidam, viu?',
 
   lessons: [{
     id: 'm15a', subject: 'INGLÊS', title: 'Bigger and the biggest',
@@ -79,7 +79,7 @@ do centro</div><p>A primeira foto dele saiu em <b>2022</b>, feita por uma rede d
     extra: ['rival'],
     intro: [
       { who: 'KAI', t: 'Aloha, {nome}! Sou o Kai, navegador e astrônomo. Bem-vindos ao Mauna Kea, no Havaí!' },
-      { who: '{rival}', t: 'Copiloto {rival} a postos pra te ajudar, {nome}! Eu trouxe o manual. E três sanduíches. Por via das dúvidas.' },
+      { who: '{rival}', t: '{rival} no banco do copiloto, a postos pra te ajudar, {nome}! Eu trouxe o manual. E três sanduíches. Por via das dúvidas.' },
     ],
     lesson: {
       id: 'm15c', subject: 'GEOGRAFIA · HAVAÍ', title: 'Navegando pelas estrelas',
@@ -111,7 +111,7 @@ Capão (12° S) → não aparece
   },
 
   gameIntro: [
-    { who: '{rival}', t: 'Copiloto falando: a gravidade puxa a nave para DENTRO o tempo todo! Relaxa, eu fico de olho no radar com você.' },
+    { who: '{rival}', t: 'Aqui do banco do copiloto: a gravidade puxa a nave para DENTRO o tempo todo! Relaxa, eu fico de olho no radar com você.' },
     { who: 'KDOK', t: 'Bip! Segure A para empurrar a nave para FORA. Fique no ANEL SEGURO, nem perto nem longe demais.' },
     { who: 'KDOK', t: 'Pegue 10 pontos de dados que giram no anel. E cuidado com as estrelas que passam voando!' },
   ],

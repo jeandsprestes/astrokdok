@@ -143,12 +143,32 @@ A.hiss = (d = 0.08, v = 0.03) => noise(d, v);
 
 // ---------- salvamento ----------
 const KEY = 'astrokdok-mat.v1';
-A.newSave = () => ({ m: 0, step: 0, stars: 0, items: [], cards: [], nome: '', rival: '', mute: false, lessons: {}, started: false });
+// nome do amigo quando a caixa fica em branco: Jaci, nome unissex (em tupi, a Lua). Até 02/11/2026 era OTÁVIO.
+A.AMIGO = 'JACI';
+A.newSave = () => ({ m: 0, step: 0, stars: 0, items: [], cards: [], nome: '', rival: '', mute: false, lessons: {}, started: false, aula: null });
 A.load = () => {
-  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s.m === 'number') { A.S = Object.assign(A.newSave(), s); return true; } } catch (_) {}
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s.m === 'number') { A.S = Object.assign(A.newSave(), s); if (A.S.rival === 'OTÁVIO') A.S.rival = A.AMIGO; return true; } } catch (_) {}
   A.S = A.newSave(); return false;
 };
 A.save = () => { try { localStorage.setItem(KEY, JSON.stringify(A.S)); } catch (_) {} };
+// salvamento automático: a cada 20 s e sempre que o jogo sai da tela (voltar, trocar de app, fechar).
+// Só depois do cadastro, para um "novo jogo" pela metade não apagar o progresso guardado.
+// Com duas abas abertas, a parada não grava por cima de um progresso maior que veio da outra.
+A.autosave = () => {
+  if (!(A.S && A.S.started)) return;
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && (s.m > A.S.m || (s.m === A.S.m && s.step > A.S.step))) return; } catch (_) {}
+  A.save();
+};
+setInterval(A.autosave, 20000);
+addEventListener('pagehide', A.autosave);
+document.addEventListener('visibilitychange', () => { if (document.hidden) A.autosave(); });
+// aviso curto por cima da tela
+A.toast = msg => {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; A.$('#app').appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(A.toastT); A.toastT = setTimeout(() => { t.hidden = true; }, 2800);
+};
 A.has = id => A.S.items.includes(id);
 // {{masculino|feminino}}: o jogador não tem gênero fixo, então o texto alterna a cada missão.
 // Sem nome, o jogador é só "cadete" (e "Piloto {nome}" vira só "Piloto").
@@ -156,7 +176,7 @@ A.gen = () => (A.S && A.S.m % 2 ? 1 : 0);
 const TITULO = /(?<![\p{L}])(cadete|piloto|capitão|capitã|conselheiro|conselheira|explorador estelar|exploradora estelar|comandante)\s+\{nome\}/giu;
 A.fmt = s => {
   let t = String(s).replace(/\{\{([^|{}]*)\|([^|{}]*)\}\}/g, (_, m, f) => A.gen() ? f : m)
-    .replace(/\{rival\}/g, A.S && A.S.rival ? A.S.rival : 'OTÁVIO');
+    .replace(/\{rival\}/g, A.S && A.S.rival ? A.S.rival : A.AMIGO);
   if (!(A.S && A.S.nome)) t = t.replace(TITULO, '$1');
   return t.replace(/\{nome\}/g, A.S && A.S.nome ? A.S.nome : 'CADETE');
 };

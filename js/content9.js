@@ -1,13 +1,13 @@
 'use strict';
 // MISSÃO 9: SATURNO · lançamento de Baikonur (Cazaquistão)
 A.MISSIONS[8] = {
-  n: 9, name: 'SATURNO', goal: 'atravessar os anéis de Saturno',
+  n: 9, name: 'SATURNO', goal: 'cuidar dos anéis de Saturno',
   place: 'BAIKONUR', where: 'Baikonur, Cazaquistão', scene: 'baikonur', game: 'saturn', body: 'saturn', room: 'patio',
   guest: { who: 'DRA. PAZ', look: [1, 2, 0], t: '¡Hola, {nome}! Vim do Chile ajudar o Zé com o sinal. Os telescópios do Atacama também escutam ele, dia e noite.' },
 
   brief: [
     { who: 'CMTE. DOZINHO', t: '{{Capitão|Capitã}}. A Dra. Paz veio do Chile para estudar o sinal com o Zé. Fale com ela, está lá fora.' },
-    { who: 'CMTE. DOZINHO', t: 'Missão 9: SATURNO. Você vai atravessar os anéis. Sem arranhar a pintura.' },
+    { who: 'CMTE. DOZINHO', t: 'Missão 9: SATURNO. Você vai ajudar a cuidar dos anéis. Nenhum pedaço de gelo fica para trás.' },
     { who: 'CMTE. DOZINHO', t: 'Hoje a aula é no PÁTIO da escola.' },
   ],
   ready: [
@@ -97,12 +97,13 @@ Baikonur       cerca de 46° N, 63° L</div><p><b>Erro comum:</b> trocar as duas
   },
 
   gameIntro: [
-    { who: 'KDOK', t: 'Bip! Os anéis são faixas de gelo girando em velocidades diferentes.' },
-    { who: 'KDOK', t: 'Use ▲ ▼ ◀ ▶ para passar pelas brechas e chegar até o topo. Precisamos atravessar 3 vezes!' },
+    { who: 'KDOK', t: 'Bip! Algumas luas pequenas de Saturno são PASTORAS: com a gravidade delas, mantêm o gelo dos anéis no lugar, como quem cuida de um rebanho.' },
+    { who: 'KDOK', t: 'Hoje a nossa nave é a pastora! Use ◀ ▶ e fique embaixo de cada pedaço de gelo que escapar do anel. A rede de gravidade devolve ele lá pra cima.' },
+    { who: 'KDOK', t: 'Devolva 12 pedaços. Sem pressa: o gelo cai devagar.' },
   ],
 
   debrief: [
-    { who: 'KDOK', t: 'ANÉIS ATRAVESSADOS! São bilhões de pedaços de gelo girando juntos, como uma dança.' },
+    { who: 'KDOK', t: 'ANEL ARRUMADO! São bilhões de pedaços de gelo girando juntos, como uma dança.' },
     { who: 'KDOK', t: 'Os cientistas acham que os anéis estão caindo aos pouquinhos no planeta. Daqui a milhões de anos, podem sumir.' },
     { who: 'KDOK', t: 'Titã, a lua gigante, tem rios e lagos. De metano! Nada de nadar lá.' },
     { who: 'KDOK', t: 'Bip... o sinal. O Zé diz que ele tem uma "temperatura". Sinal com temperatura? Que coisa.' },
@@ -118,7 +119,7 @@ Baikonur       cerca de 46° N, 63° L</div><p><b>Erro comum:</b> trocar as duas
     tomas: 'Se Saturno boia na água, eu quero uma banheira desse tamanho.',
     bia: 'O Aquecedor de Íons é ideia minha também. O Kdok queria usar uma sanduicheira.',
     caio: 'Aula no pátio! Aqui na sombra da mangueira dá pra aprender deitado.',
-    rival: 'Atravessar os anéis? Bora! Eu fico no rádio contando as brechas pra você: três, dois, um... vai!',
+    rival: 'Lua pastora? Bora! Eu fico no rádio avisando onde o gelo vai cair: esquerda, direita... pega!',
     kdok: 'Bip! Um ano em Saturno dura 29 anos da Terra. Se eu morasse lá, teria 0 anos. Sou um bebê robô!',
     ze: 'Descobri uma coisa: o sinal é fraquinho e muito frio. Como o calor que sobra de uma fogueira apagada há muito tempo.',
   },

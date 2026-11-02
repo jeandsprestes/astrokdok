@@ -87,3 +87,5 @@ input.name{font-family:'VT323',monospace;font-size:30px;width:100%;padding:12px;
 .ab .a{background:#e04848;margin-bottom:28px}
 .ab .b{background:var(--azul)}
 .ab button.on{filter:brightness(1.35);transform:scale(.93)}
+#toast{position:absolute;left:50%;top:40%;transform:translateX(-50%);max-width:90%;background:#0e0e0e;color:#f2c94c;border:3px solid #f2c94c;border-radius:6px;padding:6px 12px;font-family:"VT323",monospace;font-size:24px;text-align:center;z-index:9;pointer-events:none}
+#toast[hidden]{display:none}

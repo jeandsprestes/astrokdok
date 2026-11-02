@@ -36,7 +36,7 @@ const askText = (tag, html, def, vazio = '') => new Promise(res => {
   inp.onfocus = () => inp.select();
   u.querySelector('#ok').onclick = () => { const v = clean(inp.value); A.sfx('ok'); A.uiClose(); res(v || vazio); };
 });
-A.askRival = () => askText('CADASTRO DE CADETE', '<p class="q">Todo cadete tem uma MELHOR AMIGA OU AMIGO na turma: alguém que torce por você e ajuda quando a coisa aperta.</p><p>Qual é o nome dessa pessoa?</p><p>Se preferir, deixe em branco: aí o nome fica OTÁVIO.</p>', (A.S && A.S.rival) || '', 'OTÁVIO');
+A.askRival = () => askText('CADASTRO DE CADETE', `<p class="q">Todo cadete tem uma MELHOR AMIGA OU AMIGO na turma: alguém que torce por você e ajuda quando a coisa aperta.</p><p>Qual é o nome dessa pessoa?</p><p>Se preferir, deixe em branco: aí o nome fica ${A.AMIGO}.</p>`, (A.S && A.S.rival) || '', A.AMIGO);
 A.askName = async () => {
   A.S.nome = await askText('CADASTRO DE CADETE', '<p class="q">Boas-vindas à Astrokdok!</p><p>Qual é o seu nome, cadete?</p><p>Se preferir, deixe em branco: aí você é só CADETE.</p>', A.S.nome || '');
   A.save();
@@ -128,6 +128,7 @@ A.boot = async () => {
   if (c === 'CONTINUAR') {
     if (!A.S.nome) await A.askName();
     await A.toBase(4, 5, 'down');
+    await A.resumeLesson();
     return;
   }
   if (had) {
@@ -140,6 +141,22 @@ A.boot = async () => {
   await A.fade(1);
   await A.intro();
 };
+
+// botão voltar do celular: o primeiro toque salva e só avisa; o segundo, em até 3 s, sai do jogo.
+// A entrada extra no histórico só pode ser criada depois de um toque, senão o Chrome a ignora.
+// No celular o toque só conta como gesto no pointerup. Ao recarregar a página, a entrada extra já existe.
+let backGuard = !!(history.state && history.state.astrokdok), lastBack = 0;
+const armBack = () => { if (backGuard) return; backGuard = true; history.pushState({ astrokdok: 1 }, ''); };
+['pointerup', 'click', 'keydown'].forEach(ev => addEventListener(ev, armBack));
+addEventListener('popstate', () => {
+  if (!backGuard) return;
+  A.autosave();
+  const now = Date.now();
+  if (now - lastBack < 3000) { history.back(); return; }
+  lastBack = now;
+  history.pushState({ astrokdok: 1 }, '');
+  A.toast('Jogo salvo. Para sair, aperte VOLTAR de novo.');
+});
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 A.boot();

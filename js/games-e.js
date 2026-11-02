@@ -50,11 +50,12 @@ A.GAMES.andromeda = () => {
   const open = (x, y) => x >= 0 && y >= 0 && x < 10 && y < 8 && MAZE[y][x] !== '#';
   const HOLES = [[9, 0], [5, 2]];
   return A.game({
-    hud: 'MISSÃO 17 · ANDRÔMEDA', keys: '▲▼◀▶ ANDAR', lives: 5, intro: 'RECOLHA TODAS AS ESTRELAS',
+    hud: 'MISSÃO 17 · ANDRÔMEDA', keys: '▲▼◀▶ ANDAR', lives: 6, intro: 'RECOLHA 40 ESTRELAS',
     init(g) {
       g.dots = new Set(); MAZE.forEach((r, y) => [...r].forEach((c, x) => { if (c === '.') g.dots.add(x + ',' + y); }));
       g.p = { x: 0, y: 7, fx: 0, fy: 7, d: null, t: 0 }; g.dots.delete('0,7');
       g.total = g.dots.size + 1;
+      g.need = 40; // mais fácil desde 02/11/2026: 40 das 55 estrelas, não todas (as últimas, escondidas, eram o mais difícil)
       g.h = HOLES.map(([x, y]) => ({ x, y, fx: x, fy: y, d: 'left', t: 0 }));
     },
     update(g, dt) {
@@ -67,21 +68,21 @@ A.GAMES.andromeda = () => {
         if (p.d && open(p.x + V[p.d][0], p.y + V[p.d][1])) { p.x += V[p.d][0]; p.y += V[p.d][1]; }
         else p.d = null;
         const k = p.x + ',' + p.y;
-        if (g.dots.delete(k)) { A.tone(1200, 0.03); if (!g.dots.size) { g.win('ANDROMEDA ATRAVESSADA!'); return; } }
+        if (g.dots.delete(k)) { A.tone(1200, 0.03); if (g.total - g.dots.size >= g.need) { g.win('ANDROMEDA ATRAVESSADA!'); return; } }
       }
       p.fx += (p.x - p.fx) * Math.min(1, dt * 14); p.fy += (p.y - p.fy) * Math.min(1, dt * 14);
       g.h.forEach(h => {
         h.t += dt;
-        if (h.t >= 0.42) { // buracos lentos: quase 3x mais devagar que a nave
+        if (h.t >= 0.6) { // buracos lentos: quase 4x mais devagar que a nave (eram 0,42 s até 02/11/2026)
           h.t = 0;
           let opts = Object.keys(V).filter(d => open(h.x + V[d][0], h.y + V[d][1]) && d !== OPP[h.d]);
           if (!opts.length) opts = [OPP[h.d]];
           const dist = d => Math.abs(h.x + V[d][0] - p.x) + Math.abs(h.y + V[d][1] - p.y);
-          h.d = Math.random() < 0.45 ? opts.sort((a, b) => dist(a) - dist(b))[0] : A.pick(opts); // perseguem menos
+          h.d = Math.random() < 0.25 ? opts.sort((a, b) => dist(a) - dist(b))[0] : A.pick(opts); // quase não perseguem (era 0,45)
           h.x += V[h.d][0]; h.y += V[h.d][1];
         }
         h.fx += (h.x - h.fx) * Math.min(1, dt * 10); h.fy += (h.y - h.fy) * Math.min(1, dt * 10);
-        if (Math.hypot(h.fx - p.fx, h.fy - p.fy) < 0.45 && g.hurt()) g.h.forEach((q, i) => { q.x = q.fx = HOLES[i][0]; q.y = q.fy = HOLES[i][1]; });
+        if (Math.hypot(h.fx - p.fx, h.fy - p.fy) < 0.45 && g.hurt()) { g.inv = 2.5; g.h.forEach((q, i) => { q.x = q.fx = HOLES[i][0]; q.y = q.fy = HOLES[i][1]; }); }
       });
     },
     draw(g) {
@@ -96,7 +97,7 @@ A.GAMES.andromeda = () => {
       if (g.state === 'lose') A.withPal('fogo', () => A.boom(g.p.fx * 16 + 8, 16 + g.p.fy * 16 + 8));
       else if (A.flick(g)) A.draw(A.GAB[g.p.d || 'down'][Math.floor(g.t * 8) % 4], g.p.fx * 16, 16 + g.p.fy * 16 - 2);
     },
-    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 16, 0); A.hearts(g.lives, g.maxL, 2, 5); A.txt(`ESTRELAS ${g.total - g.dots.size}/${g.total}`, 84, 6, 3); },
+    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 16, 0); A.hearts(g.lives, g.maxL, 2, 5); A.txt(`ESTRELAS ${g.total - g.dots.size}/${g.need}`, 84, 6, 3); },
   });
 };
 

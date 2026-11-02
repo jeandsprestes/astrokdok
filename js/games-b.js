@@ -1,5 +1,5 @@
 'use strict';
-// Minijogos: Asteroides (mineração), Júpiter (sequência das luas), Saturno (travessia dos anéis).
+// Minijogos: Asteroides (mineração), Júpiter (sequência das luas), Saturno (lua pastora dos anéis).
 
 // ---------- ASTEROIDES: atirar, partir pedras e pegar cristais ----------
 A.GAMES.asteroids = (o = {}) => A.game({
@@ -109,49 +109,60 @@ A.GAMES.jupiter = (o = {}) => {
   });
 };
 
-// ---------- SATURNO: atravessar as faixas dos anéis ----------
+// ---------- SATURNO: lua pastora que devolve o gelo ao anel ----------
+// Jogo novo em 02/11/2026: a travessia dos anéis (estilo Frogger) foi achada impossível por uma criança.
+// Agora a nave faz o papel de lua pastora: anda só para os lados e rebate de volta os pedaços de gelo
+// que escapam do anel. Gelo lento, no máximo 2 caindo ao mesmo tempo e rede larga.
 A.GAMES.saturn = () => {
-  const LANES = 6, TOP = 20, H = 16;
-  const mk = k => Array.from({ length: LANES }, (_, i) => {
-    // gelo lento e pedaços menores; cada travessia acelera só 12%
-    const dir = i % 2 ? 1 : -1, sp = (14 + ((i * 7) % 5) * 5) * (1 + k * 0.12), n = 3, chunks = [];
-    for (let j = 0; j < n; j++) chunks.push({ x: j * (180 / n) + A.rnd(0, 20), w: A.ri(14, 24) });
-    return { dir, sp, chunks };
-  });
+  const RING = 44, NET = 112, HALF = 17; // fim do anel, altura da rede, meia largura da rede
+  const radar = A.has('radar');
   return A.game({
-    hud: 'MISSÃO 9 · ANÉIS', keys: '▲ ▼ ◀ ▶ MOVER', lives: 5 + A.lifeBonus('radar'), intro: 'CHEGUE AO TOPO 3 VEZES',
-    init(g) { g.cx = 5; g.cy = LANES + 1; g.cross = 0; g.lanes = mk(0); g.mc = 0; },
+    hud: 'MISSÃO 9 · ANÉIS', keys: '◀ ▶ MOVER', lives: 5 + A.lifeBonus('radar'), intro: 'DEVOLVA O GELO AO ANEL',
+    init(g) { g.x = 72; g.ice = []; g.got = 0; g.need = 12; g.st = 1.2; g.fx = []; },
     update(g, dt) {
-      g.lanes.forEach(l => l.chunks.forEach(c => { c.x += l.dir * l.sp * dt; if (c.x > 180) c.x -= 200; if (c.x < -40) c.x += 200; }));
-      g.mc -= dt;
-      if (g.mc <= 0) {
-        const d = ['up', 'down', 'left', 'right'].find(k => A.K[k]);
-        if (d) {
-          g.mc = 0.17; A.sfx('step');
-          if (d === 'up') g.cy--; if (d === 'down') g.cy = Math.min(LANES + 1, g.cy + 1);
-          if (d === 'left') g.cx = Math.max(0, g.cx - 1); if (d === 'right') g.cx = Math.min(9, g.cx + 1);
-          if (g.cy < 1) { g.cross++; A.sfx('up'); if (g.cross >= 3) { g.win('ANEIS ATRAVESSADOS!'); return; } g.cy = LANES + 1; g.lanes = mk(g.cross); }
+      if (A.K.left) g.x -= 90 * dt;
+      if (A.K.right) g.x += 90 * dt;
+      g.x = A.clamp(g.x, 0, 144);
+      g.st -= dt;
+      if (g.st <= 0 && g.ice.filter(c => c.vy > 0).length < 2) {
+        g.st = Math.max(1.9, 2.8 - g.got * 0.08);
+        g.ice.push({ x: A.rnd(16, 144), y: RING, vx: A.rnd(-6, 6), vy: 18 + g.got * 0.8, r: A.pick([4, 4, 5]) });
+      }
+      const mid = g.x + 8;
+      for (let i = g.ice.length - 1; i >= 0; i--) {
+        const c = g.ice[i];
+        c.x += c.vx * dt; c.y += c.vy * dt;
+        if (c.x < 4 || c.x > 156) { c.vx *= -1; c.x = A.clamp(c.x, 4, 156); }
+        if (c.vy < 0) { // voltando para o anel
+          if (c.y <= RING - 4) { g.ice.splice(i, 1); g.fx.push({ x: c.x, t: 0 }); }
+          continue;
         }
+        if (c.y >= NET - 2 && c.y <= NET + 6 && Math.abs(c.x - mid) <= HALF) {
+          c.vy = -60; c.vx *= 0.4; g.got++; A.sfx('coin');
+          if (g.got >= g.need) { g.win('ANEL ARRUMADO!'); return; }
+          continue;
+        }
+        if (c.y > 140) { g.ice.splice(i, 1); g.hurt(); if (g.state === 'lose') g.msg = 'O GELO ESCAPOU'; }
       }
-      if (g.cy >= 1 && g.cy <= LANES) {
-        const l = g.lanes[g.cy - 1], px = g.cx * 16 + 3;
-        if (l.chunks.some(c => px + 8 > c.x && px + 2 < c.x + c.w) && g.hurt()) { g.cy = LANES + 1; } // bate só o miolo (2 px de folga de cada lado)
-      }
+      g.fx.forEach(e => { e.t += dt; }); g.fx = g.fx.filter(e => e.t < 0.6);
     },
     draw(g) {
       A.usePal('espaco'); A.cls(0);
-      A.rect(0, TOP - 16 + 4, 160, 12, '#4fd2e6'); A.txtC('DIVISAO DE CASSINI', TOP - 9, '#0b1e4a'); // a chegada, em destaque
-      g.lanes.forEach((l, i) => {
-        const y = TOP + i * H;
-        A.rect(0, y, 160, H, i % 2 ? '#97805e' : '#b08a42'); A.rect(0, y, 160, 1, '#4a3410'); // faixas bege e dourada alternadas
-        l.chunks.forEach(c => { A.rect(c.x, y + 3, c.w, H - 6, '#eef8ff'); A.rect(c.x + 2, y + 4, c.w - 4, 2, '#8cc6ee'); }); // gelo
-      });
-      A.rect(0, TOP + LANES * H, 160, 144, 0);
-      for (let i = 0; i < 20; i++) A.rect((i * 41) % 160, TOP + LANES * H + 4 + (i * 7) % 18, 1, 1, 2);
-      const y = g.cy === 0 ? TOP - 14 : TOP + (g.cy - 1) * H;
-      if (g.state === 'lose') A.boom(g.cx * 16 + 8, y + 8);
-      else if (A.flick(g)) A.draw(A.SHIPS[A.shipLevel()], g.cx * 16, y);
+      for (let i = 0; i < 30; i++) A.rect((i * 53) % 160, 48 + (i * 37) % 96, 1, 1, i % 4 ? 1 : 3);
+      // Saturno no alto, com faixas, e o anel atravessando a tela
+      A.withPal('saturno', () => { for (let y = 8; y < 34; y++) { const w = Math.floor(Math.sqrt(Math.max(0, 80 * 80 - (y + 46) * (y + 46)))); A.rect(80 - w, y, w * 2, 1, [1, 2, 3, 2][Math.floor(y / 6) % 4]); } });
+      A.rect(0, 32, 160, 5, '#ece0c0'); A.rect(0, 37, 160, 1, '#14100a'); A.rect(0, 38, 160, 6, '#b8a47c'); // anel A, Divisão de Cassini, anel B
+      for (let i = 0; i < 24; i++) A.rect((i * 29 + g.t * (i % 2 ? 14 : 9)) % 160, 33 + (i * 5) % 10, 1, 1, '#ffffff');
+      g.fx.forEach(e => { const r = 2 + e.t * 10; A.rect(e.x - r, RING - 4, 1, 1, '#ffffff'); A.rect(e.x + r, RING - 4, 1, 1, '#ffffff'); A.rect(e.x, RING - 4 - r / 2, 1, 1, '#8cc6ee'); });
+      // radar de anéis: marca no chão onde cada pedaço vai chegar
+      if (radar) g.ice.forEach(c => { if (c.vy > 0) { const px = A.clamp(c.x + c.vx * (NET - c.y) / c.vy, 4, 156); A.rect(px - 2, 136, 5, 1, '#3fc6d6'); A.rect(px, 134, 1, 1, '#3fc6d6'); } });
+      g.ice.forEach(c => { A.rect(c.x - c.r / 2, c.y - c.r / 2, c.r, c.r, '#eef8ff'); A.rect(c.x - c.r / 2, c.y - c.r / 2, 1, 1, '#8cc6ee'); });
+      if (g.state !== 'lose') { // o gelo que escapou não acerta a nave: ela não pisca
+        const mid = g.x + 8, pulse = Math.floor(g.t * 6) % 2;
+        for (let k = -HALF; k <= HALF; k += 2) A.rect(mid + k, NET + (Math.abs(k) > 12 ? 1 : 0), 1, 1, pulse ? '#3fc6d6' : '#8ef0ff'); // rede de gravidade
+        A.draw(A.SHIPS[A.shipLevel()], g.x, 116);
+      }
     },
-    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 8, 0); A.hearts(g.lives, g.maxL, 2, 1); A.txt(`TRAVESSIAS ${g.cross}/3`, 96, 2, 3); },
+    top(g) { A.usePal('ui'); A.rect(0, 0, 160, 8, 0); A.hearts(g.lives, g.maxL, 2, 1); A.txt(`GELO ${g.got}/${g.need}`, 104, 2, 3); },
   });
 };

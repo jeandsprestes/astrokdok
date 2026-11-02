@@ -126,6 +126,18 @@ A.runClass = async () => {
   await A.say({ who: A.PROF, t: M.after });
 };
 
+// aula que ficou no meio (o jogo fechou ou a criança apertou voltar): oferece continuar dali
+A.resumeLesson = async () => {
+  const a = A.S.aula;
+  if (!a || A.over()) return;
+  const M = A.curM(), L = A.MISSIONS.flatMap(M => [...M.lessons, M.site.lesson]).find(L => L.id === a.id);
+  if (!L) { A.S.aula = null; A.save(); return; }
+  if (await A.choose(`Você parou no meio da aula "${L.title}". Quer continuar de onde parou?`, ['CONTINUAR A AULA', 'AGORA NÃO'])) return;
+  if (L === M.site.lesson && A.S.step === 2) { await A.runSite(M); return; }
+  if (M.lessons.indexOf(L) === A.S.step) { await A.enterSchool(); await A.runClass(); return; }
+  await A.runLesson(L); A.hudWorld();
+};
+
 // ---------- menus ----------
 A.menu = async () => {
   for (;;) {
@@ -175,7 +187,7 @@ A.reals = () => {
 // Itens, cartas do Cosmodex e aulas das missões anteriores ficam liberados (aulas com 0 estrelas, para revisar).
 A.startAt = i => {
   const S = A.S;
-  S.m = i; S.step = 0; S.started = true;
+  S.m = i; S.step = 0; S.started = true; S.aula = null;
   A.MISSIONS.slice(0, i).forEach(M => {
     if (!S.items.includes(M.reward.id)) S.items.push(M.reward.id);
     if (!S.cards.includes(M.card.id)) S.cards.push(M.card.id);

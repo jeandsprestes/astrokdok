@@ -4,10 +4,11 @@
 
 const fmtN = v => v === '' ? '&nbsp;' : Number(v).toLocaleString('pt-BR');
 
-function slides(L) {
+function slides(L, c) {
   return new Promise(res => {
-    let i = 0;
+    let i = Math.min(c.slide, L.slides.length - 1);
     const show = () => {
+      c.slide = i; A.save();
       const last = i === L.slides.length - 1;
       const u = A.ui(`<span class="tag">${L.subject} · ${i + 1}/${L.slides.length}</span><h2>${L.title}</h2>${A.fmt(L.slides[i])}
         <div class="row">${i > 0 ? '<button class="btn alt" id="bk">◀ VOLTAR</button>' : ''}<button class="btn" id="nx">${last ? 'DESAFIOS ▶' : 'PRÓXIMO ▶'}</button></div>`);
@@ -77,16 +78,22 @@ function askQ(L, q, idx, kd) {
   });
 }
 
+// A.S.aula guarda onde a aula parou (tela ou desafio): se o jogo fechar no meio, ela continua dali.
 A.runLesson = async L => {
   A.readMode(true);
-  A.hud(L.subject, `★ 0/${L.quiz.length}`);
-  await slides(L);
-  let got = 0;
-  const kd = { left: true };
-  for (let i = 0; i < L.quiz.length; i++) {
-    if (await askQ(L, L.quiz[i], i, kd)) got++;
-    A.hud(L.subject, `★ ${got}/${L.quiz.length}`);
+  const c = A.S.aula && A.S.aula.id === L.id ? A.S.aula : { id: L.id, slide: 0, q: -1, got: 0, kd: true };
+  A.S.aula = c;
+  A.hud(L.subject, `★ ${c.got}/${L.quiz.length}`);
+  if (c.q < 0) { await slides(L, c); c.q = 0; A.save(); }
+  const kd = { left: c.kd };
+  c.q = Math.min(c.q, L.quiz.length); c.got = Math.min(c.got, c.q);
+  for (let i = c.q; i < L.quiz.length; i++) {
+    if (await askQ(L, L.quiz[i], i, kd)) c.got++;
+    c.q = i + 1; c.kd = kd.left; A.save();
+    A.hud(L.subject, `★ ${c.got}/${L.quiz.length}`);
   }
+  const got = c.got;
+  A.S.aula = null;
   A.S.lessons[L.id] = Math.max(A.S.lessons[L.id] || 0, got);
   A.S.stars = Object.values(A.S.lessons).reduce((a, b) => a + b, 0);
   A.save();

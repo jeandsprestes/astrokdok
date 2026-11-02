@@ -114,7 +114,7 @@ MERCI   = obrigado
     { who: 'KDOK', t: 'Bip! O Escudo de Radiação salvou meus circuitos. E o sinal continua: fraquinho, de todos os lados.' },
   ],
   card: { id: 'jupiter', name: 'JÚPITER', lines: ['O maior planeta: caberiam 1.300 Terras', 'Planeta de gás, sem chão', 'Grande Mancha Vermelha: tempestade gigante', 'Mais de 90 luas', 'Dia: só 10 horas'] },
-  reward: { id: 'radar', name: 'RADAR DE ANÉIS', desc: 'Mostra as brechas entre os pedaços de gelo. Nos anéis de Saturno, vale um escudo a mais.' },
+  reward: { id: 'radar', name: 'RADAR DE ANÉIS', desc: 'Mostra onde cada pedaço de gelo vai cair. Nos anéis de Saturno, vale um escudo a mais.' },
   radio: 'Aqui é a Astrokdok! Equação parece bicho de sete cabeças, mas é só uma balança: o que você faz de um lado, faz do outro. Você mostrou que dá conta. Câmbio!',
   real: 'Monte uma linha do tempo num papel comprido: 1500 (portugueses no Brasil), 1610 (Galileu), 1969 (pessoas na Lua) e o ano em que você nasceu.',
 
