@@ -53,14 +53,32 @@ A.hit = k => { const v = A.P[k]; A.P[k] = false; return !!v; };
 A.uiOpen = () => !$('#ui').hidden;
 A.locked = () => !!A.modal || A.uiOpen() || A.busy;
 
+// Setas de toque (melhoradas em 02/11/2026, ficha do Jean: "não funciona tão bem" no celular):
+// - toque rápido vale pelo menos 150 ms, para os jogos que andam em passos não perderem o toque;
+// - na diagonal, a seta atual só troca quando o dedo vai bem para o outro lado (sem tremer entre duas);
+// - a área de toque passa da borda desenhada (style.css) e o celular vibra de leve a cada seta nova.
 const dp = $('#dpad');
+const HOLD = 150;
 let dpId = null, dpDir = null;
-function setDir(d) { if (d === dpDir) return; if (dpDir) release(dpDir); dpDir = d; if (d) press(d); dp.dataset.dir = d || ''; }
+const dpT = {}, dpLate = {};
+function setDir(d) {
+  if (d === dpDir) return;
+  if (dpDir) {
+    const k = dpDir, left = HOLD - (performance.now() - dpT[k]);
+    if (left > 0) dpLate[k] = setTimeout(() => { if (dpDir !== k) release(k); }, left);
+    else release(k);
+  }
+  dpDir = d; dp.dataset.dir = d || '';
+  if (d) { clearTimeout(dpLate[d]); dpT[d] = performance.now(); press(d); try { navigator.vibrate && navigator.vibrate(8); } catch (_) {} }
+}
 function dirFrom(e) {
   const r = dp.getBoundingClientRect();
   const x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2);
   if (Math.hypot(x, y) < r.width * 0.1) return dpDir;
-  return Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
+  const ax = Math.abs(x), ay = Math.abs(y);
+  if (dpDir === 'left' || dpDir === 'right') { if (ax * 1.4 >= ay) return x > 0 ? 'right' : 'left'; }
+  else if ((dpDir === 'up' || dpDir === 'down') && ay * 1.4 >= ax) return y > 0 ? 'down' : 'up';
+  return ax > ay ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
 }
 dp.addEventListener('pointerdown', e => { e.preventDefault(); dpId = e.pointerId; try { dp.setPointerCapture(e.pointerId); } catch (_) {} setDir(dirFrom(e)); });
 dp.addEventListener('pointermove', e => { if (e.pointerId === dpId) setDir(dirFrom(e)); });

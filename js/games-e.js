@@ -60,11 +60,14 @@ A.GAMES.andromeda = () => {
     },
     update(g, dt) {
       const p = g.p;
-      const want = ['up', 'down', 'left', 'right'].find(k => A.K[k]);
+      // a seta pedida fica guardada por 0,6 s: tocar um pouco antes da curva já vira nela
+      const k0 = ['up', 'down', 'left', 'right'].find(k => A.K[k]);
+      if (k0) { p.want = k0; p.wantT = 0.6; } else p.wantT = (p.wantT || 0) - dt;
+      const want = p.wantT > 0 ? p.want : null;
       p.t += dt;
       if (p.t >= 0.16) {
         p.t = 0;
-        if (want && open(p.x + V[want][0], p.y + V[want][1])) p.d = want;
+        if (want && open(p.x + V[want][0], p.y + V[want][1])) { p.d = want; p.wantT = 0; }
         if (p.d && open(p.x + V[p.d][0], p.y + V[p.d][1])) { p.x += V[p.d][0]; p.y += V[p.d][1]; }
         else p.d = null;
         const k = p.x + ',' + p.y;

@@ -75,13 +75,14 @@ input.name{font-family:'VT323',monospace;font-size:30px;width:100%;padding:12px;
 
 #pad{flex:1;display:flex;align-items:center;justify-content:space-between;padding:4px 12px;min-height:150px}
 #pad[hidden],#ui[hidden],#box[hidden]{display:none}
-#dpad{width:148px;height:148px;position:relative;touch-action:none;flex:none}
+#dpad{width:148px;height:148px;position:relative;touch-action:none;flex:none;-webkit-user-select:none;user-select:none}
+#dpad::before{content:'';position:absolute;inset:-18px}
 #dpad i{position:absolute;background:#2a3155;border:3px solid #3d4878;border-radius:8px}
 #dpad .v{left:49px;top:0;width:50px;height:148px}
 #dpad .h{top:49px;left:0;width:148px;height:50px}
 #dpad b{position:absolute;color:#7f8bc0;font-size:18px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;pointer-events:none}
 #dpad .u{left:49px;top:0}#dpad .d{left:49px;bottom:0}#dpad .l{left:0;top:49px}#dpad .r{right:0;top:49px}
-#dpad[data-dir=up] .u,#dpad[data-dir=down] .d,#dpad[data-dir=left] .l,#dpad[data-dir=right] .r{color:#fff}
+#dpad[data-dir=up] .u,#dpad[data-dir=down] .d,#dpad[data-dir=left] .l,#dpad[data-dir=right] .r{color:#fff;background:#4a5aa0;border-radius:8px}
 .ab{display:flex;gap:14px;align-items:flex-end;transform:rotate(-18deg);flex:none}
 .ab button{width:68px;height:68px;border-radius:50%;border:3px solid var(--ink);box-shadow:0 0 0 3px #3d4878;font-family:'Press Start 2P',monospace;font-size:16px;color:#fff;touch-action:none}
 .ab .a{background:#e04848;margin-bottom:28px}
