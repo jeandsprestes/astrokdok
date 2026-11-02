@@ -112,21 +112,22 @@ A.GAMES.jupiter = (o = {}) => {
 // ---------- SATURNO: lua pastora que devolve o gelo ao anel ----------
 // Jogo novo em 02/11/2026: a travessia dos anéis (estilo Frogger) foi achada impossível por uma criança.
 // Agora a nave faz o papel de lua pastora: anda só para os lados e rebate de volta os pedaços de gelo
-// que escapam do anel. Gelo lento, no máximo 2 caindo ao mesmo tempo e rede larga.
+// que escapam do anel. Em 02/11/2026 o Jean achou MUITO fácil: agora são 15 pedaços, o gelo cai mais rápido
+// e acelera, até 3 caem juntos e a rede ficou mais estreita.
 A.GAMES.saturn = () => {
-  const RING = 44, NET = 112, HALF = 17; // fim do anel, altura da rede, meia largura da rede
+  const RING = 44, NET = 112, HALF = 13; // fim do anel, altura da rede, meia largura da rede
   const radar = A.has('radar');
   return A.game({
     hud: 'MISSÃO 9 · ANÉIS', keys: '◀ ▶ MOVER', lives: 5 + A.lifeBonus('radar'), intro: 'DEVOLVA O GELO AO ANEL',
-    init(g) { g.x = 72; g.ice = []; g.got = 0; g.need = 12; g.st = 1.2; g.fx = []; },
+    init(g) { g.x = 72; g.ice = []; g.got = 0; g.need = 15; g.st = 1.2; g.fx = []; },
     update(g, dt) {
       if (A.K.left) g.x -= 90 * dt;
       if (A.K.right) g.x += 90 * dt;
       g.x = A.clamp(g.x, 0, 144);
       g.st -= dt;
-      if (g.st <= 0 && g.ice.filter(c => c.vy > 0).length < 2) {
-        g.st = Math.max(1.9, 2.8 - g.got * 0.08);
-        g.ice.push({ x: A.rnd(16, 144), y: RING, vx: A.rnd(-6, 6), vy: 18 + g.got * 0.8, r: A.pick([4, 4, 5]) });
+      if (g.st <= 0 && g.ice.filter(c => c.vy > 0).length < 3) {
+        g.st = Math.max(1.3, 2.3 - g.got * 0.07);
+        g.ice.push({ x: A.rnd(16, 144), y: RING, vx: A.rnd(-10, 10), vy: 24 + g.got * 1.2, r: A.pick([4, 4, 5]) });
       }
       const mid = g.x + 8;
       for (let i = g.ice.length - 1; i >= 0; i--) {

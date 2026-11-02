@@ -99,7 +99,7 @@ Baikonur       cerca de 46° N, 63° L</div><p><b>Erro comum:</b> trocar as duas
   gameIntro: [
     { who: 'KDOK', t: 'Bip! Algumas luas pequenas de Saturno são PASTORAS: com a gravidade delas, mantêm o gelo dos anéis no lugar, como quem cuida de um rebanho.' },
     { who: 'KDOK', t: 'Hoje a nossa nave é a pastora! Use ◀ ▶ e fique embaixo de cada pedaço de gelo que escapar do anel. A rede de gravidade devolve ele lá pra cima.' },
-    { who: 'KDOK', t: 'Devolva 12 pedaços. Sem pressa: o gelo cai devagar.' },
+    { who: 'KDOK', t: 'Devolva 15 pedaços. No começo o gelo cai devagar, depois vai apertando!' },
   ],
 
   debrief: [
