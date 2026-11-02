@@ -113,21 +113,33 @@ A.GAMES.jupiter = (o = {}) => {
 // Jogo novo em 02/11/2026: a travessia dos anéis (estilo Frogger) foi achada impossível por uma criança.
 // Agora a nave faz o papel de lua pastora: anda só para os lados e rebate de volta os pedaços de gelo
 // que escapam do anel. Em 02/11/2026 o Jean achou MUITO fácil: agora são 15 pedaços, o gelo cai mais rápido
-// e acelera, até 3 caem juntos e a rede ficou mais estreita.
+// e acelera, até 3 caem juntos e a rede ficou mais estreita. Ainda fácil, e quase nunca caíam dois juntos:
+// agora são 20 pedaços, nascem bem mais seguido, cada um numa velocidade, e 2 a 4 ficam caindo ao mesmo tempo.
+// Cada pedaço chega à rede depois do anterior e perto o bastante para a nave alcançar.
 A.GAMES.saturn = () => {
-  const RING = 44, NET = 112, HALF = 13; // fim do anel, altura da rede, meia largura da rede
+  const RING = 44, NET = 112, HALF = 13, SPEED = 90; // fim do anel, altura da rede, meia largura da rede, velocidade da nave
   const radar = A.has('radar');
   return A.game({
     hud: 'MISSÃO 9 · ANÉIS', keys: '◀ ▶ MOVER', lives: 5 + A.lifeBonus('radar'), intro: 'DEVOLVA O GELO AO ANEL',
-    init(g) { g.x = 72; g.ice = []; g.got = 0; g.need = 15; g.st = 1.2; g.fx = []; },
+    init(g) { g.x = 72; g.ice = []; g.got = 0; g.need = 20; g.st = 1.0; g.fx = []; g.lastT = 0; g.lastX = 80; },
     update(g, dt) {
-      if (A.K.left) g.x -= 90 * dt;
-      if (A.K.right) g.x += 90 * dt;
+      if (A.K.left) g.x -= SPEED * dt;
+      if (A.K.right) g.x += SPEED * dt;
       g.x = A.clamp(g.x, 0, 144);
       g.st -= dt;
-      if (g.st <= 0 && g.ice.filter(c => c.vy > 0).length < 3) {
-        g.st = Math.max(1.3, 2.3 - g.got * 0.07);
-        g.ice.push({ x: A.rnd(16, 144), y: RING, vx: A.rnd(-10, 10), vy: 24 + g.got * 1.2, r: A.pick([4, 4, 5]) });
+      if (g.st <= 0) {
+        const gap = Math.max(0.5, 1.1 - g.got * 0.04);
+        g.st = gap;
+        const arrive = Math.max(g.t + A.rnd(1.7, 2.9) - g.got * 0.04, g.lastT + gap); // quando chega à rede
+        const fall = arrive - g.t, vy = (NET - RING) / fall;
+        const reach = SPEED * (arrive - g.lastT) * 0.9 + HALF - 2; // até onde a nave chega desde o pedaço anterior
+        let px = g.lastX + (Math.random() < 0.5 ? -1 : 1) * reach * A.rnd(0.4, 1); // obriga a nave a andar
+        if (px < 12 || px > 148) px = 2 * g.lastX - px; // bateu na borda: vai para o outro lado
+        px = A.clamp(px, 12, 148);
+        let vx = A.rnd(-6, 6);
+        if (px - vx * fall < 6 || px - vx * fall > 154) vx = -vx; // nasce dentro da tela
+        g.ice.push({ x: px - vx * fall, y: RING, vx, vy, r: A.pick([4, 4, 5]) });
+        g.lastT = arrive; g.lastX = px;
       }
       const mid = g.x + 8;
       for (let i = g.ice.length - 1; i >= 0; i--) {
