@@ -41,7 +41,7 @@ A.GAMES.uranus = () => {
     },
     draw(g) {
       A.usePal('urano'); A.cls(0);
-      const L = ICE[g.room].map;
+      const L = ICE[Math.min(g.room, ICE.length - 1)].map; // depois da última sala, g.room passa do fim: desenha a última (05/11/2026)
       L.forEach((r, y) => [...r].forEach((c, x) => {
         const X = x * 16, Y = 16 + y * 16;
         A.rect(X, Y, 16, 16, '#c4eef6'); A.rect(X + 2, Y + 3, 5, 1, '#7cc8e0'); A.rect(X + 9, Y + 11, 4, 1, '#7cc8e0'); // gelo azul-claro
