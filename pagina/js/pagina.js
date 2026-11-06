@@ -179,12 +179,12 @@
   montarChapeu($('#chapeu-folha'));
   montarChapeu($('#chapeu-pagina'));
   (() => {
-    const folha = $('#folha-chapeu'), abrir = $('#abrir-chapeu');
-    if (!abrir) return;
-    abrir.addEventListener('click', () => {
+    const folha = $('#folha-chapeu'), abridores = $$('[data-abrir-chapeu]');
+    if (!abridores.length) return;
+    abridores.forEach(abrir => abrir.addEventListener('click', () => {
       if (folha && typeof folha.showModal === 'function') { folha.showModal(); const x = folha.querySelector('.fechar, [data-fechar]'); if (x) x.focus({ preventScroll: true }); }
-      else { const m = $('#magalhaes'); if (m) m.scrollIntoView(); }
-    });
+      else { const m = $('#chapeu'); if (m) m.scrollIntoView(); }
+    }));
     if (!folha) return;
     $$('[data-fechar]', folha).forEach(b => b.addEventListener('click', () => folha.close()));
     folha.addEventListener('click', ev => { if (ev.target === folha) folha.close(); });
@@ -367,10 +367,12 @@
         $('img', f).addEventListener('error', semFoto);
       }
     }
-    const z = $('#falar-jean'); if (!z) return;
+    // o botão de falar comigo aparece em vários lugares da página (06/11/2026)
     const n = String(CFG.whatsappJean || '').replace(/\D/g, '');
-    if (n) z.href = 'https://wa.me/' + n + '?text=' + encodeURIComponent('Oi, Jean. Vim pela página do Astrokdok.');
-    else { z.removeAttribute('href'); z.classList.add('falta'); z.dataset.falta = 'o WhatsApp do Jean (js/config.js, whatsappJean)'; }
+    $$('[data-falar]').forEach(z => {
+      if (n) z.href = 'https://wa.me/' + n + '?text=' + encodeURIComponent('Oi, Jean. Vim pela página do Astrokdok.');
+      else { z.removeAttribute('href'); z.classList.add('falta'); z.dataset.falta = 'o WhatsApp do Jean (js/config.js, whatsappJean)'; }
+    });
   })();
 
   // =====================================================================

@@ -139,11 +139,11 @@ main{position:relative;z-index:1}
 .janela-texto{margin:11px 9px 0;min-height:3.4em}
 
 /* ---------- a subida ---------- */
-.subida{position:relative;padding-top:16vh}
+.subida{position:relative;padding-top:10vh}
 /* as etapas só dão o comprimento da subida (umas 3 telas no celular); a legenda de cada camada aparece num lugar fixo, uma por vez */
-.etapa{position:relative;min-height:38vh}
-.etapa-curta{min-height:30vh}
-.etapa:last-child{min-height:70vh}
+.etapa{position:relative;min-height:30vh}
+.etapa-curta{min-height:24vh}
+.etapa:last-child{min-height:56vh}   /* 06/11/2026: a subida ficou cerca de 30% mais curta, a pedido do Jean */
 .ficha,.kdok-caixa{position:fixed;z-index:5;left:var(--lado);right:var(--lado);top:calc(var(--hud) + var(--topo-seguro) + 70px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
 .ficha.ativa,.kdok-caixa.ativa{opacity:1;visibility:visible}
 .ficha{max-width:440px;margin:0 auto;background:#070914;border:2px solid var(--moldura);border-radius:8px;padding:12px 14px 13px}
@@ -416,4 +416,16 @@ dialog.folha::backdrop{background:rgba(3,4,10,.74)}
   .imp li b{display:block;font:700 8pt/1.3 "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:#111;margin-bottom:1pt}
   .imp li.ultima b{color:#087a57}
   .imp-pe{margin-top:9pt;padding-top:6pt;border-top:.6pt solid #bbb;font-size:8pt;color:#555;display:flex;justify-content:space-between;gap:12pt}
+}
+
+/* ---------- 06/11/2026: os botões que se repetem na viagem e o bloco do Chapéu Digital ---------- */
+.btn .contribua{font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--loomb-claro);border:1px solid rgba(11,170,122,.55);border-radius:999px;padding:5px 8px 4px;margin-left:-2px;white-space:nowrap}
+.cta-par{display:grid;gap:10px;width:100%;max-width:400px;margin:26px auto 6px}
+.bloco-chapeu{margin-top:72px;scroll-margin-top:calc(var(--hud) + var(--topo-seguro) + 24px)}
+.bloco-chapeu .rotulo-chapeu{color:var(--loomb-claro);margin-bottom:8px}
+.botoes-fim .btn-chapeu{flex:1 1 220px}
+.botoes-fim .btn-zap{flex:1 1 200px;justify-content:center}
+@media (min-width:760px){
+  .cta-par{display:flex;flex-wrap:wrap;max-width:none;margin:30px 0 6px;gap:12px}
+  .cta-par .btn{white-space:nowrap;padding:12px 22px}
 }

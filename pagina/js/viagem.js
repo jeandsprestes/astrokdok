@@ -296,7 +296,7 @@
     return T_FIM;
   }
   function trilhaCalma(y) { // movimento reduzido: um quadro parado para cada etapa
-    const meio = y + G.vh * 0.5, fixos = [40, 110, 235, 395, 545, 705, 880];
+    const meio = y + G.vh * 0.5, fixos = [40, 110, 235, 395, 545, 880];   // um por etapa (a dos 600 km saiu em 06/11/2026)
     if (y < G.fimA * 0.9) return -1;
     let k = 0; G.etapas.forEach((e, i) => { if (meio >= e[0]) k = i; });
     return y > G.fimB ? T_FIM : fixos[Math.min(k, fixos.length - 1)];

@@ -80,8 +80,8 @@
       <div class="acoes">
         <a class="btn btn-jogar" id="jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo>
           <svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
-        <button class="btn btn-chapeu" id="abrir-chapeu" type="button" aria-haspopup="dialog">
-          <svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Passar no chapéu digital</button>
+        <button class="btn btn-chapeu" id="abrir-chapeu" type="button" data-abrir-chapeu aria-haspopup="dialog">
+          <svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Chapéu Digital<span class="contribua">contribua</span></button>
       </div>
       <details class="celular" id="celular">
         <summary><svg width="12" height="18" viewBox="0 0 6 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M0 0h6v9H0z"/><path fill="#05060f" d="M1 1h4v6H1z"/></svg>Pôr o jogo na tela do celular</summary>
@@ -150,9 +150,6 @@
     <div class="etapa" data-t="460">
       <div class="ficha"><p class="ficha-t">ATÉ 80 KM</p><p>Os meteoros queimam aqui. A estrela cadente que a gente vê do quintal é um meteoro.</p></div>
     </div>
-    <div class="etapa" data-t="620">
-      <div class="ficha"><p class="ficha-t">ATÉ 600 KM</p><p>A Estação Espacial voa a uns 400 km de altura e dá uma volta na Terra a cada 90 minutos.</p></div>
-    </div>
     <div class="etapa etapa-orbita" data-t="780">
       <p class="caixa-jogo kdok-caixa"><span class="quem">KDOK:</span>ÓRBITA ALCANÇADA! 400 km de altura. Estamos na termosfera, junto da Estação Espacial.<br>Aquela linha fininha brilhando na borda é a atmosfera. É ela que guarda o ar que a gente respira.</p>
     </div>
@@ -172,6 +169,10 @@
       </figure>
       <div class="video" id="video"></div>
     </div>
+    <div class="cta-par">
+      <a class="btn btn-jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo><svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
+      <button class="btn btn-chapeu" type="button" data-abrir-chapeu aria-haspopup="dialog"><svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Chapéu Digital<span class="contribua">contribua</span></button>
+    </div>
     <h3 class="passos-titulo">Como é uma missão</h3>
     <p>Cada missão tem o mesmo ritmo, sem pressa.</p>
     <ol class="passos">
@@ -186,6 +187,24 @@
       <li class="passo"><div class="tela-jogo"><img class="pix" src="img/jogo/base_18_capao_noite.png" width="160" height="144" alt="O Vale do Capão de noite, com a Via Láctea no céu, como aparece no jogo" loading="lazy" decoding="async"></div>
         <div><h4>Fora da tela</h4><p>No fim, uma tarefa no mundo de verdade. Olhar a Lua e desenhar a fase, fazer um relógio de sol com um palito, procurar o Cruzeiro do Sul.</p></div></li>
     </ol>
+
+    <!-- o Chapéu Digital, logo depois de como é uma missão (pedido do Jean em 06/11/2026: a página ficou longa) -->
+    <div class="bloco-chapeu" id="chapeu">
+      <p class="rotulo rotulo-chapeu">Contribua</p>
+        <h2 id="t-chapeu">Chapéu Digital</h2>
+      <p>Não ter preço não quer dizer que não tem valor, nem que não houve trabalho. O jogo me custou tempo, dinheiro e dedicação.</p>
+      <p>O justo depende de cada casa. Quem pode pagar um pouco mais paga, e assim financia o acesso de quem não pode. Se testou e não gostou, tudo certo: não deve nada.</p>
+      <figure class="fala">
+        <blockquote>
+          <p>“Se de repente ele consegue completar o jogo inteiro, que são 18 fases, eu vou sentir: então teve um valor para essa família.”</p>
+          <p>“Pode contribuir por você e por alguém que não pode contribuir, e vai poder jogar também.”</p>
+        </blockquote>
+        <figcaption>Jean</figcaption>
+      </figure>
+      <div class="cartao chapeu" id="chapeu-pagina"></div>
+      <p class="nota no-ticket">No marketing existe o <i>high ticket</i>, o preço alto, e o <i>low ticket</i>, o preço baixo. Eu brinco que o Astrokdok é <i>no ticket</i>: não tem preço.</p>
+      <div class="botoes-linha"><a class="btn-sec btn-zap" data-falar href="#" target="_blank" rel="noopener"><svg width="18" height="16" viewBox="0 0 9 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M1 0h7v1H1zM0 1h9v4H0zM1 5h7v1H1zM2 6h2v1H2zM2 7h1v1H2z"/><path fill="#05060f" d="M2 3h1v1H2zM4 3h1v1H4zM6 3h1v1H6z"/></svg>Falar comigo no WhatsApp</a></div>
+    </div>
   </section>
 
   <!-- LUA · 384.400 km: o caderno da Lua de hoje (módulo lua) -->
@@ -229,6 +248,10 @@
       </ol>
     </div>
     <div class="modulo modulo-missoes" data-modulo="missoes"><ol class="reserva reserva-missoes" id="reserva-missoes"></ol></div>
+    <div class="cta-par">
+      <a class="btn btn-jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo><svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
+      <button class="btn btn-chapeu" type="button" data-abrir-chapeu aria-haspopup="dialog"><svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Chapéu Digital<span class="contribua">contribua</span></button>
+    </div>
   </section>
 
   <!-- PRÓXIMA CENTAURI · 4,2 anos-luz: o jogo num celular desenhado -->
@@ -282,36 +305,22 @@
       </blockquote>
       <figcaption>Jean</figcaption>
     </figure>
+    <div class="cta-par">
+      <a class="btn btn-jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo><svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
+      <button class="btn btn-chapeu" type="button" data-abrir-chapeu aria-haspopup="dialog"><svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Chapéu Digital<span class="contribua">contribua</span></button>
+    </div>
   </section>
 
-  <!-- NUVENS DE MAGALHÃES · 160 mil anos-luz: o chapéu digital, para onde vai e quem faz -->
-  <section class="parada" id="magalhaes" data-parada="magalhaes" aria-labelledby="t-chapeu">
+  <!-- NUVENS DE MAGALHÃES · 160 mil anos-luz: quem faz (o chapéu subiu para a órbita em 06/11/2026) -->
+  <section class="parada" id="magalhaes" data-parada="magalhaes" aria-labelledby="t-quem">
     <div class="placa"><span class="n" data-missao="MAGALHÃES">MISSÃO 16</span><span class="onde">NUVENS DE MAGALHÃES</span><span class="dist">Grande Nuvem a 160 mil anos-luz, Pequena a 200 mil · duas galáxias vizinhas da nossa</span></div>
-    <h2 id="t-chapeu">O chapéu digital</h2>
-    <p>Não ter preço não quer dizer que não tem valor, nem que não houve trabalho. O jogo me custou tempo, dinheiro e dedicação.</p>
-    <p>O justo depende de cada casa. Quem pode pagar um pouco mais paga, e assim financia o acesso de quem não pode. Se testou e não gostou, tudo certo: não deve nada.</p>
-    <figure class="fala">
-      <blockquote>
-        <p>“Se de repente ele consegue completar o jogo inteiro, que são 18 fases, eu vou sentir: então teve um valor para essa família.”</p>
-        <p>“Pode contribuir por você e por alguém que não pode contribuir, e vai poder jogar também.”</p>
-      </blockquote>
-      <figcaption>Jean</figcaption>
-    </figure>
-    <div class="cartao chapeu" id="chapeu-pagina"></div>
-    <p class="nota no-ticket">No marketing existe o <i>high ticket</i>, o preço alto, e o <i>low ticket</i>, o preço baixo. Eu brinco que o Astrokdok é <i>no ticket</i>: não tem preço.</p>
-
-    <h3>Para onde vai</h3>
-    <p>O que entra cobre o trabalho de quem faz o jogo, vira novos jogos e ferramentas abertas, e uma parte vai para projetos sociais do Vale do Capão, começando pela brigada de incêndio. Quanto entrou e para onde foi fica aberto aqui.</p>
-    <div id="transparencia"></div>
-
-    <h3>Quem faz</h3>
+    <h2 id="t-quem">Quem faz</h2>
     <div class="rostos">
       <figure class="rosto"><div class="foto" id="foto-jean"></div><figcaption><b>Jean</b><span>do Vale do Capão, na Chapada Diamantina</span></figcaption></figure>
-      <figure class="rosto"><div class="foto foto-loomb"><svg width="64" height="64" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#099268" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="58 12" transform="rotate(-70 16 16)"/></svg></div><figcaption><b>LOOMB</b><span>o avatar digital do Jean</span></figcaption></figure>
+      <figure class="rosto"><div class="foto foto-loomb"><svg width="64" height="64" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#099268" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="58 12" transform="rotate(-70 16 16)"/></svg></div><figcaption><b>LOOMB</b><span>Serviços Digitais</span></figcaption></figure>
     </div>
-    <p>No digital, a gente não é a gente mesmo. Se quiser me conhecer de verdade, venha onde eu estou.</p>
-    <div class="botoes-linha"><a class="btn-sec btn-zap" id="falar-jean" href="#" target="_blank" rel="noopener">
-      <svg width="18" height="16" viewBox="0 0 9 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M1 0h7v1H1zM0 1h9v4H0zM1 5h7v1H1zM2 6h2v1H2zM2 7h1v1H2z"/><path fill="#05060f" d="M2 3h1v1H2zM4 3h1v1H4zM6 3h1v1H6z"/></svg>Falar com o Jean</a></div>
+    <div class="botoes-linha"><a class="btn-sec btn-zap" id="falar-jean" data-falar href="#" target="_blank" rel="noopener">
+      <svg width="18" height="16" viewBox="0 0 9 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M1 0h7v1H1zM0 1h9v4H0zM1 5h7v1H1zM2 6h2v1H2zM2 7h1v1H2z"/><path fill="#05060f" d="M2 3h1v1H2zM4 3h1v1H4zM6 3h1v1H6z"/></svg>Falar comigo no WhatsApp</a></div>
     <details class="como-feito">
       <summary>Como o jogo foi feito</summary>
       <div class="dentro">
@@ -357,6 +366,8 @@
     <div class="botoes-linha botoes-fim">
       <a class="btn btn-jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo>
         <svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
+      <button class="btn btn-chapeu" type="button" data-abrir-chapeu aria-haspopup="dialog"><svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Chapéu Digital<span class="contribua">contribua</span></button>
+      <a class="btn-sec btn-zap" data-falar href="#" target="_blank" rel="noopener"><svg width="18" height="16" viewBox="0 0 9 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M1 0h7v1H1zM0 1h9v4H0zM1 5h7v1H1zM2 6h2v1H2zM2 7h1v1H2z"/><path fill="#05060f" d="M2 3h1v1H2zM4 3h1v1H4zM6 3h1v1H6z"/></svg>Falar comigo no WhatsApp</a>
       <button class="btn-sec" type="button" id="voltar-base">Voltar para a base</button>
       <button class="btn-sec" type="button" id="mandar">Mandar para alguém</button>
     </div>
@@ -368,13 +379,13 @@
   <a class="marca-loomb" href="#base" aria-label="LOOMB. Voltar para o topo"><svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#099268" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="58 12" transform="rotate(-70 16 16)"/></svg><span>LOOMB</span></a>
 </footer>
 
-<!-- O chapéu, aberto pelo botão do topo (o mesmo componente da parada das Nuvens de Magalhães) -->
+<!-- O chapéu, aberto pelos botões "Chapéu Digital" (o mesmo componente do bloco do chapéu, na órbita) -->
 <dialog class="folha" id="folha-chapeu" aria-labelledby="t-folha">
   <div class="dentro">
-    <header><h2 id="t-folha">Chapéu digital</h2><button class="fechar" type="button" data-fechar aria-label="Fechar">×</button></header>
+    <header><h2 id="t-folha">Chapéu Digital</h2><button class="fechar" type="button" data-fechar aria-label="Fechar">×</button></header>
     <p>Jogue e teste com calma. Se o jogo fizer sentido para a sua família, passe no chapéu.</p>
     <div class="chapeu" id="chapeu-folha"></div>
-    <p class="nota folha-pe">Por que um chapéu: <a href="#magalhaes" data-fechar>lá embaixo, nas Nuvens de Magalhães</a>.</p>
+    <p class="nota folha-pe">Por que um chapéu: <a href="#chapeu" data-fechar>aqui na página</a>.</p>
   </div>
 </dialog>
 
