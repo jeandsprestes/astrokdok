@@ -26,7 +26,7 @@ window.ASTROKDOK_CONFIG = {
   //   nome: o nome do recebedor como está no banco (até 25 letras, sem acento)
   //   cidade: a cidade do recebedor (até 15 letras, sem acento)
   //   txid: a marca que aparece no extrato (deixe ASTROKDOK)
-  pix: { chave: '', nome: '', cidade: '', txid: 'ASTROKDOK' },
+  pix: { chave: 'b78d884b-b122-4d58-826f-7e89fb7af716', nome: 'JEAN PRESTES', cidade: 'PALMEIRAS', txid: 'ASTROKDOK' },   // chave aleatória do Jean (06/11/2026); nome e cidade são campos obrigatórios do padrão do Pix, o banco de quem paga mostra o nome do titular da chave
 
   // Os valores sugeridos: R$ 0, 5, 15 e 30 (decididos pelo Jean em 30/10/2026).
   // Os 3 centavos marcam no extrato que o Pix veio do Astrokdok.

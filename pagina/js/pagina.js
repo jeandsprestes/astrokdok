@@ -103,10 +103,11 @@
   // O CHAPÉU DIGITAL: um componente só (a folha do topo e as Nuvens de Magalhães)
   // =====================================================================
   const ROTULOS = [
-    { nome: 'Jogar sem pagar', desc: 'quando não dá, tudo bem' },
-    { nome: 'Possível', desc: 'para quando o mês aperta' },
-    { nome: 'Justo', desc: 'o do meio' },
-    { nome: 'Generoso', desc: 'e outra família joga também' },
+    // as palavras da mensagem do Jean para o grupo do Capão (06/11/2026)
+    { nome: 'Agradecimento', desc: 'sem possibilidade financeira, um feedback ou um agradecimento' },
+    { nome: 'Mínima', desc: 'a contribuição mínima' },
+    { nome: 'Justa', desc: 'a contribuição justa' },
+    { nome: 'Generosa', desc: 'ajuda a financiar outros softwares e sistemas abertos' },
   ];
   const VALORES = (Array.isArray(CFG.valores) && CFG.valores.length ? CFG.valores : [0, 5.03, 15.03, 30.03]).map(Number).filter(v => isFinite(v) && v >= 0).slice(0, 4);
   const PADRAO = VALORES.length > 2 ? VALORES[2] : VALORES[VALORES.length - 1];   // o justo vem marcado
