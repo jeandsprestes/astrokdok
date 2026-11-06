@@ -8,3 +8,5 @@
 !/icon-512.png
 !/js/
 !/.gitignore
+# a página de divulgação (cópia de Marketing/pagina, feita por Marketing/pagina/ferramentas/publicar.py)
+!/pagina/

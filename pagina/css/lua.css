@@ -1,0 +1,137 @@
+/* O caderno da Lua de hoje (módulo lua, js/lua.js). Classes com o prefixo lu-.
+   Papel de caderno no meio do cosmo: letra de mão (Caveat) só aqui dentro; o resto em IBM Plex Sans;
+   o cartão da tarefa com a caixa do próprio jogo (VT323, papel, borda dupla e anel azul).
+   As cores do papel e do lápis saem dos tokens do :root (azul da pauta, vermelho da margem). LOOMB, 05/11/2026. */
+.lu{
+  --lu-papel:#f3ede1; --lu-papel2:#e2d7c2;
+  --lu-pauta:rgba(59,111,214,.2);
+  --lu-margem:rgba(210,86,43,.5);
+  --lu-grafite:#2d2d35; --lu-grafite2:#55545e;
+  --lu-fita:rgba(232,221,190,.86);
+  --lu-carimbo:#8a3b30;
+  --lu-mao:Caveat,"Segoe Print","Bradley Hand",cursive;
+  --lu-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --lu-pix:VT323,ui-monospace,Consolas,monospace;
+  --lu-polegar:30px;
+  position:relative;max-width:600px;margin:10px auto 64px;text-align:left;text-shadow:none;
+  color:var(--lu-grafite);font:400 15.5px/1.55 var(--lu-sans);
+}
+.lu *,.lu *::before,.lu *::after{box-sizing:border-box}
+.lu *{text-shadow:none} /* as regras gerais da parada põem sombra escura nos títulos; no papel, não */
+
+/* a folha */
+.lu .lu-caderno{position:relative;display:block;margin:0;padding:30px 18px 26px 46px;border-radius:4px 4px 10px 10px;
+  background-color:var(--lu-papel);
+  background-image:
+    linear-gradient(90deg,transparent 33px,var(--lu-margem) 33px,var(--lu-margem) 34.5px,transparent 34.5px),
+    repeating-linear-gradient(180deg,transparent 0,transparent 27px,var(--lu-pauta) 27px,var(--lu-pauta) 28px),
+    radial-gradient(130% 90% at 40% 0%,rgba(255,255,255,.5),transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-position:0 0,0 50px,0 0,0 0;
+  box-shadow:0 30px 60px rgba(0,0,0,.5),0 3px 0 var(--lu-papel2),0 4px 0 rgba(0,0,0,.25)}
+.lu .lu-fita{position:absolute;top:-11px;width:84px;height:24px;background:var(--lu-fita);box-shadow:0 1px 3px rgba(0,0,0,.18);
+  clip-path:polygon(3% 8%,10% 0,22% 7%,35% 1%,50% 6%,64% 0,78% 6%,90% 1%,97% 9%,100% 92%,88% 100%,74% 94%,60% 100%,46% 95%,31% 100%,16% 94%,4% 100%,0 90%)}
+.lu .lu-fita-e{left:18px;transform:rotate(-5deg)}
+.lu .lu-fita-d{right:18px;transform:rotate(4deg)}
+
+/* o topo: a data a lápis e o carimbo */
+/* o carimbo vem antes no código; na tela fica à direita, e, se a data não couber do lado, vai para a linha de cima */
+.lu .lu-topo{display:flex;flex-direction:row-reverse;flex-wrap:wrap;align-items:flex-start;gap:8px 12px;margin:0 0 2px}
+.lu .lu-data{margin:0 auto 0 0;font:600 23px/1.15 var(--lu-mao);color:var(--lu-grafite)}
+.lu .lu-carimbo{flex:none;margin:3px 2px 0 0;padding:5px 8px;border:1.5px solid rgba(138,59,48,.6);border-radius:6px;transform:rotate(3deg);
+  font:600 11px/1.2 var(--lu-sans);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:var(--lu-carimbo);background:none}
+
+/* a Lua a lápis e as anotações */
+.lu .lu-lua{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:8px;align-items:center;margin:4px 0 0}
+.lu .lu-desenho{display:block;width:100%;max-width:240px;height:auto;overflow:visible}
+.lu .lu-notas{margin:0;display:grid;gap:3px;font:600 20px/1.15 var(--lu-mao);color:var(--lu-grafite)}
+.lu .lu-fase{font-size:34px;line-height:1;color:#202027}
+.lu .lu-nasce{font-size:19px;color:var(--lu-grafite2);text-wrap:balance}
+.lu .lu-legenda{margin:6px 0 0;font:600 17.5px/1.3 var(--lu-mao);color:var(--lu-grafite2);text-wrap:balance}
+.lu .lu-risco{height:10px;margin:16px 0 4px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C 60 3, 110 8, 160 5 S 250 4, 298 6' fill='none' stroke='%232D2D35' stroke-opacity='.55' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+
+/* a tarefa: um pedaço da tela do jogo, colado com fita */
+.lu .lu-jogo{position:relative;margin:22px 0 0;padding:0}
+.lu .lu-fita-c{left:50%;top:-13px;margin-left:-42px;transform:rotate(-2deg);z-index:1}
+.lu .lu-jogo-caixa{position:relative;display:flow-root;padding:10px 12px 12px;border:4px double var(--tinta,#1d2340);border-radius:6px;
+  box-shadow:0 0 0 3px var(--azul,#3b6fd6),0 10px 18px rgba(0,0,0,.16);background:var(--papel,#fffdf6);color:var(--tinta,#1d2340);font:22px/1.05 var(--lu-pix)}
+.lu .lu-jogo-topo{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 6px}
+.lu .lu-jogo-lua{flex:none;display:block;width:61px;height:61px;margin:-4px -2px 0 0;image-rendering:pixelated;image-rendering:crisp-edges}
+.lu .lu-jogo-tag{display:inline-block;padding:3px 7px 4px;border-radius:4px;background:var(--roxo,#8e5bd6);color:#fff;font:19px/1 var(--lu-pix)}
+.lu .lu-jogo-cab{margin:0 0 8px;font:20px/1.05 var(--lu-pix);color:var(--azul2,#2a52aa);text-wrap:balance}
+.lu .lu-jogo-texto{margin:0;padding:0;border:0;quotes:none}
+.lu .lu-jogo-texto p{margin:0;font:21px/1.1 var(--lu-pix);color:var(--tinta,#1d2340)}
+.lu .lu-jogo-fonte{margin:8px 2px 0 0;text-align:right;font:600 16.5px/1.2 var(--lu-mao);color:var(--lu-grafite2)}
+
+/* quando dá para ver */
+.lu .lu-conselho{margin:16px 0 0;font:400 15.5px/1.6 var(--lu-sans);color:#34333b;text-wrap:pretty}
+.lu .lu-conselho b{font-weight:600;color:#1f1f26}
+
+/* a régua dos próximos 30 dias */
+.lu .lu-regua{margin:18px 0 0}
+.lu .lu-regua-cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lu .lu-regua-cab label{font:600 19px/1.2 var(--lu-mao);color:var(--lu-grafite2)}
+.lu .lu-regua-cab output{font:700 22px/1.2 var(--lu-mao);color:var(--lu-grafite);white-space:nowrap}
+.lu input[type=range]{-webkit-appearance:none;appearance:none;display:block;width:100%;height:44px;margin:2px 0 0;padding:0;background:transparent;cursor:pointer;border-radius:22px}
+.lu input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--lu-grafite) var(--lu-p,0%),rgba(45,45,53,.28) var(--lu-p,0%))}
+.lu input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:rgba(45,45,53,.28)}
+.lu input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:var(--lu-grafite)}
+.lu input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:var(--lu-polegar);height:var(--lu-polegar);margin-top:calc(var(--lu-polegar) / -2 + 1.5px);border-radius:50%;
+  border:2px solid var(--lu-grafite);background:radial-gradient(circle at 64% 50%,var(--lu-papel) 52%,transparent 53%),var(--lu-grafite);box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.lu input[type=range]::-moz-range-thumb{width:var(--lu-polegar);height:var(--lu-polegar);border-radius:50%;
+  border:2px solid var(--lu-grafite);background:radial-gradient(circle at 64% 50%,var(--lu-papel) 52%,transparent 53%),var(--lu-grafite);box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.lu .lu-marcas{position:relative;height:48px;margin:0 calc(var(--lu-polegar) / 2)}
+.lu .lu-marca{position:absolute;top:0;transform:translateX(-50%);display:grid;justify-items:center;align-content:start;gap:3px;min-width:44px;min-height:44px;
+  margin:0;padding:5px 2px 0;border:0;border-radius:8px;background:none;color:var(--lu-grafite2);font:600 15.5px/1 var(--lu-mao);cursor:pointer}
+.lu .lu-marca svg{display:block;width:16px;height:16px}
+.lu .lu-marca:hover,.lu .lu-marca-aqui{color:var(--lu-grafite)}
+.lu .lu-marca-aqui span{text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+
+/* lembrar (uma oferta, discreta) e o lugar das contas */
+.lu .lu-lembrar{margin:12px 0 0}
+.lu .lu-btn{display:inline-flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;min-height:48px;margin:0;padding:7px 14px;border-radius:12px;
+  border:1.5px solid rgba(45,45,53,.42);background:rgba(255,255,255,.38);color:var(--lu-grafite);font:600 15px/1.25 var(--lu-sans);text-align:left;cursor:pointer}
+.lu .lu-btn:hover{background:rgba(255,255,255,.7)}
+.lu .lu-btn[hidden]{display:none}
+.lu .lu-btn small{display:block;font:600 16.5px/1.15 var(--lu-mao);color:var(--lu-grafite2)}
+.lu .lu-status{margin:6px 0 0;font:400 14px/1.45 var(--lu-sans);color:var(--lu-grafite2)}
+.lu .lu-status:empty{display:none}
+.lu .lu-lugar{margin:16px 0 0;padding-right:4px;font:400 13.5px/1.5 var(--lu-sans);color:var(--lu-grafite2);text-wrap:pretty}
+.lu .lu-lapis{position:absolute;right:-8px;bottom:-34px;width:176px;height:auto;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35));pointer-events:none}
+
+/* foco do teclado: no papel claro, o azul do jogo aparece melhor que o azul do painel */
+.lu button:focus-visible,.lu input:focus-visible{outline:3px solid var(--azul2,#2a52aa);outline-offset:2px}
+
+/* o lápis desenhando a Lua, uma vez, quando o caderno aparece (nunca com "reduzir movimento") */
+.lu-anima .lu-contorno{stroke-dasharray:1 1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s cubic-bezier(.55,.1,.35,1)}
+.lu-anima .lu-contorno2{transition-delay:.3s}
+.lu-anima .lu-hachura,.lu-anima .lu-luz,.lu-anima .lu-term{opacity:0;transition:opacity 1s ease 1.1s}
+.lu-anima .lu-notas>*{opacity:0;transition:opacity .6s ease}
+.lu-anima.lu-desenhado .lu-contorno{stroke-dashoffset:0}
+.lu-anima.lu-desenhado .lu-hachura,.lu-anima.lu-desenhado .lu-luz,.lu-anima.lu-desenhado .lu-term,.lu-anima.lu-desenhado .lu-notas>*{opacity:1}
+.lu-anima.lu-desenhado .lu-notas>:nth-child(1){transition-delay:1.3s}
+.lu-anima.lu-desenhado .lu-notas>:nth-child(2){transition-delay:1.6s}
+.lu-anima.lu-desenhado .lu-notas>:nth-child(3){transition-delay:1.9s}
+@media (prefers-reduced-motion:reduce){
+  .lu-anima .lu-contorno{stroke-dashoffset:0;transition:none}
+  .lu-anima .lu-hachura,.lu-anima .lu-luz,.lu-anima .lu-term,.lu-anima .lu-notas>*{opacity:1;transition:none}
+}
+
+/* no computador: a mesma folha, maior por dentro, sem passar de 600 px */
+@media (min-width:640px){
+  .lu .lu-caderno{padding:38px 34px 32px 72px;background-position:0 0,0 54px,0 0,0 0;
+    background-image:
+      linear-gradient(90deg,transparent 51px,var(--lu-margem) 51px,var(--lu-margem) 52.5px,transparent 52.5px),
+      repeating-linear-gradient(180deg,transparent 0,transparent 27px,var(--lu-pauta) 27px,var(--lu-pauta) 28px),
+      radial-gradient(130% 90% at 40% 0%,rgba(255,255,255,.5),transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E")}
+  .lu .lu-fita-e{left:30px} .lu .lu-fita-d{right:30px}
+  .lu .lu-lua{grid-template-columns:230px minmax(0,1fr);gap:22px}
+  .lu .lu-fase{font-size:40px}
+  .lu .lu-notas{font-size:22px}
+  .lu .lu-nasce{font-size:21px}
+  .lu .lu-data{font-size:26px}
+  .lu .lu-jogo{margin-right:28px}
+  .lu .lu-jogo-texto p{font-size:23px;line-height:1.08}
+  .lu .lu-lapis{width:226px;right:-36px;bottom:-36px}
+}

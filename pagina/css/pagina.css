@@ -1,0 +1,419 @@
+/* Astrokdok · a página (LOOMB, 05/11/2026). Todo o CSS do núcleo.
+   Os módulos têm o deles (css/missoes.css com .mi-, css/lua.css com .lu-) e usam só os tokens daqui. */
+:root{
+  --vazio:#05060B; --sup:#0C0E18; --sup2:#131628; --linha:#1E2238; --linha2:#2A2F4A;
+  --texto:#E6E8F0; --corpo:#C9CDDC; --apagado:#8A90A6; --portal:#9DA9FF;
+  --loomb:#099268; --loomb-claro:#0BAA7A; --falta:#E3AA52;
+  --amarelo:#f2c200; --preto:#0e0e0e; --papel:#fffdf6; --tinta:#1d2340; --azul:#3b6fd6; --azul2:#2a52aa; --verm:#d2562b; --roxo:#8e5bd6; --moldura:#2a3155;
+  /* o verde dos botões de texto pequeno (branco sobre ele passa no contraste AA) e o vermelho do "KDOK:" no papel */
+  --loomb-btn:#08805b; --verm-papel:#b4441f;
+  --hud:44px; --lado:16px; --vao:30vh; --topo-seguro:env(safe-area-inset-top,0px);
+  --margem:calc(max(32px,(100vw - 1240px) / 2) + 32px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip;scroll-padding-top:calc(var(--hud) + var(--topo-seguro) + 12px)}
+body{margin:0;background:var(--vazio);color:var(--texto);font:17px/1.6 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+img,canvas,svg{display:block}
+a{color:var(--loomb-claro);text-underline-offset:3px}
+a:hover{color:#3fd3a0}
+b,strong{color:var(--texto);font-weight:600}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--portal);outline-offset:3px;border-radius:6px}
+.pix{image-rendering:crisp-edges;image-rendering:pixelated}
+.so-leitor{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.pular-conteudo{position:fixed;z-index:60;left:12px;top:-80px;padding:10px 14px;background:var(--sup2);color:var(--texto);border:1px solid var(--portal);border-radius:10px;text-decoration:none}
+.pular-conteudo:focus{top:calc(var(--hud) + var(--topo-seguro) + 10px)}
+
+/* ---------- o céu: um canvas fixo, em pixel, atrás de tudo ---------- */
+.ceu{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none;
+  background:linear-gradient(#05060f 0,#0b1030 26%,#1f2558 44%,#45337c 56%,#9c4a86 66%,#ec7e5c 73%,#3c3470 74%,#161a33 82%,#0d1120 88%)}
+.ceu canvas{position:absolute;top:0;left:50%;transform:translateX(-50%);image-rendering:crisp-edges;image-rendering:pixelated}
+main{position:relative;z-index:1}
+
+/* ---------- o painel de bordo (HUD), no jeito da barra do jogo ---------- */
+.hud{position:fixed;top:0;left:0;right:0;z-index:30;padding-top:var(--topo-seguro);background:rgba(10,11,16,.96);border-bottom:2px solid var(--moldura);font-family:VT323,ui-monospace,monospace}
+.hud-linha{display:flex;align-items:center;gap:8px;height:var(--hud);max-width:1240px;margin:0 auto;padding:0 8px 0 6px}
+.hud-nave{flex:none;width:32px;height:32px}
+.hud-rotulo{flex:1;min-width:0;color:var(--amarelo);font-size:21px;line-height:1;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-num{flex:none;color:#fff;font-size:21px;line-height:1;letter-spacing:.04em;white-space:nowrap}
+.hud-luz{max-width:1240px;margin:-7px auto 0;padding:0 10px 5px 46px;font:500 11.5px/1.3 "IBM Plex Mono",monospace;color:#a3a9c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-luz:empty{display:none}
+.hud-botao{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:32px;padding:0 10px;border-radius:4px;border:0;font:21px/1 VT323,monospace;letter-spacing:.06em;text-decoration:none;cursor:pointer}
+.hud-pular{background:transparent;color:#f39a45;border:2px solid #f39a45;height:30px}
+.hud-jogar{background:var(--loomb-btn);color:#fff}
+.hud-jogar:hover{background:var(--loomb);color:#fff}
+.hud-botao[hidden]{display:none}
+.hud-botao{position:relative}
+.hud-botao::after{content:"";position:absolute;inset:-7px -4px}   /* a área do toque passa de 44 px sem engordar o painel */
+.hud-aviso{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);max-width:calc(100vw - 24px);background:var(--preto);color:var(--amarelo);border:2px solid var(--moldura);border-radius:4px;
+  padding:2px 10px 3px;font-size:19px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .3s;pointer-events:none}
+.hud-aviso.ver{opacity:1}
+/* com a linha da luz à vista, o aviso entra no lugar dela, dentro do painel, sem cobrir a página */
+.hud.aviso-na-linha .hud-aviso{top:auto;bottom:0;left:0;right:0;transform:none;max-width:1240px;margin:0 auto;padding:0 10px 3px 46px;background:#0a0b10;border:0;border-radius:0;font-size:18px;line-height:1.05}
+.hud.avisando.aviso-na-linha .hud-luz{visibility:hidden}
+.hud-rotulo.rumo::before{content:"";display:inline-block;width:6px;height:10px;margin:0 7px 0 1px;vertical-align:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 5' shape-rendering='crispEdges'%3E%3Cpath fill='%23f2c200' d='M0 0h1v5H0zM1 1h1v3H1zM2 2h1v1H2z'/%3E%3C/svg%3E") no-repeat center/6px 10px}
+@media (max-width:420px){.hud-rotulo,.hud-num,.hud-botao{font-size:19px;letter-spacing:.02em}.hud-luz{font-size:11px}}
+
+/* ---------- a régua das paradas (computador) ---------- */
+.regua{display:none}
+@media (min-width:1100px){
+  .regua{display:block;position:fixed;z-index:25;left:30px;top:calc(var(--hud) + var(--topo-seguro) + 40px);bottom:34px;width:150px;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+  .regua.ver{opacity:1;visibility:visible}
+  .regua ol{list-style:none;margin:0;padding:0 0 0 18px;height:100%;display:flex;flex-direction:column;justify-content:space-between;border-left:2px solid var(--linha2)}
+  .regua li{position:relative}
+  .regua li::before{content:"";position:absolute;left:-25px;top:50%;width:12px;height:2px;margin-top:-1px;background:var(--linha2)}
+  .regua a{display:inline-block;padding:3px 4px;font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;color:#7a81a3;text-decoration:none;border-radius:4px}
+  .regua a:hover{color:var(--texto)}
+  .regua li.passou a{color:var(--corpo)}
+  .regua li.agora a{color:var(--amarelo)}
+  .regua li.agora::before{background:var(--amarelo)}
+  .regua-nave{position:absolute;left:-17px;width:32px;height:32px;pointer-events:none}
+}
+
+/* ---------- a base: o primeiro quadro ---------- */
+.topo{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:calc(var(--hud) + var(--topo-seguro) + 18px) var(--lado) 112px}
+/* uma sombra macia atrás do texto: as estrelas e o degradê não brigam com as letras */
+.topo::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:150%;height:64%;transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(50% 58% at 50% 46%,rgba(5,6,15,.5),rgba(5,6,15,.22) 60%,transparent 100%)}
+.topo-texto{display:flex;flex-direction:column;align-items:center;width:100%}
+.rotulo{margin:0 0 12px;font:600 11.5px/1.3 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:#c3c8da;text-shadow:0 1px 2px #05060f,0 0 6px #05060f}
+.topo h1{margin:0}
+.marca-pixel{width:288px;height:56px;margin:0 auto}
+.sub-pixel{width:204px;height:18px;margin:10px auto 0}
+.lema{font-size:16.5px;line-height:1.5;color:#e8eaf4;max-width:23em;margin:16px auto 0;text-wrap:balance;text-shadow:0 0 5px #05060f,0 0 9px #05060f,0 1px 2px #05060f}
+.acoes{display:grid;gap:10px;width:100%;max-width:400px;margin:20px auto 0}
+.btn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:14px;border:1.5px solid transparent;
+  font:700 18px/1.2 "IBM Plex Sans",sans-serif;text-decoration:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .15s,border-color .15s,transform .1s}
+.btn:active{transform:translateY(1px)}
+.btn svg{flex:none}
+.btn-jogar{background:var(--loomb);min-height:58px;font-size:20px;letter-spacing:.01em;
+  box-shadow:0 12px 32px rgba(9,146,104,.35),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.2)}
+.btn-jogar:hover{background:#0aa073;color:#fff}
+.btn-chapeu{background:rgba(9,12,24,.62);border-color:rgba(11,170,122,.65);color:var(--texto)}
+.btn-chapeu:hover{background:rgba(9,146,104,.16);border-color:var(--loomb-claro)}
+
+/* pôr no celular: a gaveta */
+.celular{width:100%;max-width:400px;margin:4px auto 0;text-align:left}
+.celular>summary{list-style:none;display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;cursor:pointer;color:#e3e6f2;font:500 15.5px/1.3 "IBM Plex Sans",sans-serif;
+  text-decoration:underline;text-decoration-color:rgba(11,170,122,.75);text-underline-offset:4px;text-decoration-thickness:1px;text-shadow:0 1px 3px #05060f}
+.celular>summary::-webkit-details-marker{display:none}
+.celular[open]>summary{color:#fff}
+.celular-corpo{margin-top:6px;background:rgba(9,12,24,.96);border:1px solid var(--linha2);border-radius:14px;padding:14px}
+.celular-intro{margin:0 0 12px;font-size:15px;line-height:1.5;color:var(--corpo)}
+.abas{display:flex;gap:6px;margin-bottom:12px}
+.abas button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--linha2);background:transparent;color:var(--apagado);font:600 14px "IBM Plex Sans",sans-serif;cursor:pointer}
+.abas button[aria-selected="true"]{background:var(--sup2);color:var(--texto);border-color:var(--loomb-claro)}
+.aba p{margin:0 0 8px;font-size:15px;line-height:1.5;color:var(--corpo)}
+.aba .nota{font-size:13.5px}
+.passo-a-passo{margin:0 0 8px;padding:0;list-style:none;counter-reset:pp;display:grid;gap:6px}
+.passo-a-passo li{counter-increment:pp;position:relative;padding-left:34px;min-height:24px;font-size:15px;line-height:1.5;color:var(--corpo)}
+.passo-a-passo li::before{content:counter(pp);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--sup2);border:1px solid var(--linha2);color:var(--amarelo);font:20px/22px VT323,monospace;text-align:center}
+.aba-pc{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.aba-pc[hidden]{display:none}
+.qr-jogo{width:148px;height:148px;background:#fff;border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center}
+.qr-jogo img,.qr-jogo svg{width:100%;height:100%;image-rendering:pixelated}
+.qr-jogo .qr-texto{font:500 11px/1.3 "IBM Plex Mono",monospace;color:#1d2340;word-break:break-all;text-align:center}
+@media (max-width:420px){.aba-pc{grid-template-columns:1fr;justify-items:center}}
+.btn-abrir{margin-top:6px;width:100%;justify-content:center}
+.zeros{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px;margin:12px 0 0;padding:0;list-style:none;font-size:13.5px;color:#cfd3e2;text-shadow:0 1px 2px rgba(5,6,15,.95),0 0 6px rgba(5,6,15,.8)}
+.zeros b{color:#3fd3a0;font-weight:600}
+.deixa{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:6px;
+  font:20px/1 VT323,monospace;letter-spacing:.12em;color:#dde1ee;text-shadow:0 2px 0 #000}
+
+/* a janela do jogo, na metade direita do topo (só no computador) */
+.janela{display:none}
+.caixa-jogo{background:var(--papel);color:var(--tinta);border:4px double var(--tinta);box-shadow:0 0 0 3px var(--azul);border-radius:6px;padding:7px 11px 9px;font:22px/1.08 VT323,monospace;margin:3px}
+.caixa-jogo .quem{color:var(--verm-papel);margin-right:6px}
+.janela-barra{display:flex;align-items:center;gap:4px;height:44px;padding:0 2px;font:21px/1 VT323,monospace;color:var(--amarelo)}
+.janela-seta{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#fff;cursor:pointer}
+.janela-seta:hover{background:#1a1e30}
+.janela-missao{flex:1;min-width:0;padding-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.04em}
+.janela-conta{flex:none;color:#fff;letter-spacing:.04em;padding-right:4px}
+.janela-tela{border-top:3px solid var(--moldura);border-bottom:3px solid var(--moldura);background:#000;padding:0 3px}
+.janela-tela img{width:320px;height:288px}
+.janela-texto{margin:11px 9px 0;min-height:3.4em}
+
+/* ---------- a subida ---------- */
+.subida{position:relative;padding-top:16vh}
+/* as etapas só dão o comprimento da subida (umas 3 telas no celular); a legenda de cada camada aparece num lugar fixo, uma por vez */
+.etapa{position:relative;min-height:38vh}
+.etapa-curta{min-height:30vh}
+.etapa:last-child{min-height:70vh}
+.ficha,.kdok-caixa{position:fixed;z-index:5;left:var(--lado);right:var(--lado);top:calc(var(--hud) + var(--topo-seguro) + 70px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.ficha.ativa,.kdok-caixa.ativa{opacity:1;visibility:visible}
+.ficha{max-width:440px;margin:0 auto;background:#070914;border:2px solid var(--moldura);border-radius:8px;padding:12px 14px 13px}
+.ficha-t{margin:0 0 4px;font:22px/1 VT323,monospace;letter-spacing:.06em;color:var(--amarelo)}
+.ficha p:last-child{margin:0;font-size:16px;line-height:1.5;color:#e2e5f0}
+.kdok-caixa{margin:0 auto;max-width:440px;font-size:24px;line-height:1.05;padding:8px 12px 12px}
+
+/* ---------- as paradas da viagem ---------- */
+.parada{position:relative;padding:var(--vao) var(--lado) 4vh;max-width:720px;margin:0 auto}
+#orbita{padding-top:44vh}
+.parada>p,.parada .placa,:where(.parada) h2,:where(.parada) h3,.fala p,.fala figcaption,.naves-faixa>p,.demo-texto p,.demo-acoes .nota{text-shadow:0 0 2px #05060f,0 0 5px #05060f,0 0 10px #05060f}
+@media (max-width:700px){.parada>p,.parada .placa,:where(.parada) h2,:where(.parada) h3,.fala p,.fala figcaption,.naves-faixa>p,.demo-texto p,.demo-acoes .nota{text-shadow:0 0 4px #05060f}}   /* no celular, uma camada só: a rolagem fica mais leve */
+.placa{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0 0 14px;font:21px/1.1 VT323,monospace;letter-spacing:.06em}
+.placa .n{color:var(--amarelo)}
+.placa .onde{color:#fff}
+.placa .dist{flex-basis:100%;font:500 12.5px/1.5 "IBM Plex Mono",monospace;letter-spacing:0;color:#9aa0b8}
+:where(.parada) h2{font:700 clamp(27px,7.2vw,40px)/1.12 Syne,"IBM Plex Sans",sans-serif;letter-spacing:-.005em;margin:0 0 16px;text-wrap:balance}
+:where(.parada) h3{font:700 20px/1.25 Syne,sans-serif;margin:30px 0 8px}
+/* :where() deixa estas regras gerais mais fracas que as dos módulos (a sala e o caderno têm papel claro e letra escura) */
+:where(.parada) p{margin:0 0 14px;color:var(--corpo)}
+.cartao{background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:18px;padding:18px}
+.nota{font-size:14px;line-height:1.5;color:var(--apagado)}
+.fala{margin:22px 0;padding:2px 0 2px 18px;border-left:3px solid var(--loomb)}
+.fala blockquote{margin:0}
+.fala p{font-size:18px;line-height:1.55;color:var(--texto);margin:0 0 10px}
+.fala figcaption{font:500 12.5px "IBM Plex Mono",monospace;color:#9aa0b8}
+/* o que falta: borda tracejada âmbar, com o nome do que entra */
+.falta{border:1.5px dashed var(--falta);color:var(--falta);background:linear-gradient(rgba(227,170,82,.08),rgba(227,170,82,.08)) #0b0c14;border-radius:12px;padding:12px 14px;font:500 13px/1.45 "IBM Plex Mono",monospace}
+.falta::before{content:"FALTA · " attr(data-falta);font-weight:600}
+.portal{border:3px solid var(--moldura);border-radius:6px;background:#000;width:max-content;max-width:100%;overflow:hidden;margin:0 auto 22px;padding:10px}
+.portal img{width:308px;height:202px}
+.reserva:empty{display:none}
+.reserva{color:var(--corpo)}
+
+/* órbita: a fala, o vídeo e como é uma missão */
+.orbita-grade{display:grid;gap:4px}
+.video{width:min(250px,72vw);aspect-ratio:9/16;margin:4px auto 10px;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:18px;overflow:hidden}
+.video .falta{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:18px;border-radius:18px}
+.video video,.video iframe{width:100%;height:100%;border:0;border-radius:18px;background:#000}
+.video-botao{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border:1px solid var(--linha2);border-radius:18px;background:linear-gradient(180deg,#131628,#0a0c16);color:var(--texto);font:600 16px "IBM Plex Sans",sans-serif;cursor:pointer}
+.video-botao span{display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:var(--loomb)}
+@media (min-width:760px){.orbita-grade{grid-template-columns:minmax(0,1fr) 230px;gap:32px;align-items:start}.orbita-grade .video{width:230px;margin:22px 0 0}}
+.passos-titulo{margin-top:26px!important}
+.passos{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
+.passo{display:grid;grid-template-columns:166px minmax(0,1fr);gap:12px;align-items:center;background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:14px;padding:7px 10px 7px 7px}
+.tela-jogo{width:166px;height:150px;border:3px solid var(--moldura);border-radius:6px;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.tela-jogo img{width:160px;height:144px;flex:none}
+.tela-corpo img{width:141px;height:86px}
+.passo h4{font:700 16px/1.25 Syne,sans-serif;margin:0 0 4px;color:var(--texto)}
+.passo p{margin:0;font-size:14px;line-height:1.42;color:var(--corpo)}
+
+/* sol: as missões de verdade */
+.lista-real{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lista-real li{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:10px 12px;background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:12px;font-size:15px;line-height:1.45;color:var(--corpo)}
+.lista-real .num{font:22px/1 VT323,monospace;color:var(--amarelo);padding-top:2px}
+.lista-real b{display:block;font:600 12px/1.3 "IBM Plex Mono",monospace;letter-spacing:.06em;color:#9aa0b8;margin-bottom:3px}
+.lista-real li.ultima{border-color:rgba(11,170,122,.55);background:linear-gradient(180deg,rgba(9,146,104,.16),rgba(12,14,24,.92))}
+.lista-real li.oculta{display:none}
+.lista-real.toda li.oculta{display:grid}
+.botoes-linha{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn-sec{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:10px 16px;border-radius:12px;border:1.5px solid var(--linha2);background:var(--sup);color:var(--texto);font:600 15px/1.25 "IBM Plex Sans",sans-serif;cursor:pointer;text-decoration:none}
+.btn-sec:hover{border-color:var(--loomb-claro);color:var(--texto)}
+
+/* planetas: as naves */
+.intro-planetas{margin-bottom:6px}
+.naves-faixa{margin:14px 0 22px}
+.naves-faixa>p{margin:0 0 10px;color:var(--corpo);text-shadow:0 0 6px #05060f}
+.naves{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.naves li{background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:12px;padding:12px 4px 10px;text-align:center}
+.naves img{width:48px;height:48px;margin:0 auto 8px}
+.naves b{display:block;font:18px/1 VT323,monospace;letter-spacing:.03em;color:var(--amarelo);font-weight:400}
+@media (min-width:640px){.naves{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.reserva-missoes{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.reserva-missoes li{padding:8px 12px;background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:10px;font-size:14.5px;color:var(--corpo)}
+.reserva-missoes b{font:20px/1 VT323,monospace;color:var(--amarelo);margin-right:8px;font-weight:400}
+
+/* próxima: o jogo num celular desenhado */
+.demo{display:grid;gap:14px;justify-items:center}
+.demo-texto p{margin:0 0 10px}
+.aparelho{margin:4px 0 0;width:min(300px,100%);padding:12px 12px 14px;border-radius:40px;background:linear-gradient(160deg,#20253c,#0c0f1c);border:1px solid var(--linha2);box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.aparelho-tela{position:relative;border-radius:28px;overflow:hidden;background:#12162b;aspect-ratio:1170/2532}
+.aparelho-tela img{width:100%;height:100%;object-fit:cover}
+.aparelho-tela iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#12162b}
+.tela-legenda{margin:16px 2px 0;min-height:4.4em;font-size:20px}
+.tela-controles{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.tela-controles[hidden]{display:none}
+.seta{display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:1.5px solid var(--linha2);background:var(--sup);color:var(--texto);cursor:pointer}
+.seta:hover{border-color:var(--loomb-claro)}
+.tela-conta{font:21px/1 VT323,monospace;letter-spacing:.06em;color:var(--amarelo)}
+.demo-acoes{width:min(300px,100%);text-align:center}
+.demo-acoes .btn{width:100%}
+.demo-acoes .nota{margin:10px 0 0}
+@media (min-width:760px){
+  .demo{grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:auto 1fr;column-gap:36px;align-items:start;justify-items:stretch}
+  .demo-texto{grid-column:1;grid-row:1}
+  .aparelho{grid-column:2;grid-row:1 / span 2;margin:0}
+  .demo-acoes{grid-column:1;grid-row:2;align-self:start;text-align:left;width:auto;max-width:320px}
+}
+
+/* sagitário: o cuidado */
+.zeros-frase{font:700 19px/1.4 Syne,sans-serif!important;color:var(--texto)!important;margin:4px 0 16px!important}
+.cuidados{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cuidados li{background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:14px;padding:14px 12px}
+.cuidados li::before{content:"";display:block;width:20px;height:3px;background:var(--loomb-claro);margin-bottom:10px}
+.cuidados b{display:block;font:700 15.5px/1.25 Syne,sans-serif;margin-bottom:5px}
+.cuidados span{display:block;font-size:13.5px;line-height:1.45;color:#a0a6bb}
+@media (min-width:640px){.cuidados{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* o chapéu digital: o mesmo componente na folha do topo e nas Nuvens de Magalhães */
+.chapeu .valores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+@media (min-width:520px){.chapeu .valores{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.valor{position:relative;appearance:none;background:var(--sup2);border:1.5px solid var(--linha);border-radius:14px;padding:12px 6px 11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--texto);-webkit-tap-highlight-color:transparent}
+.valor:hover{border-color:var(--linha2)}
+.valor .nome{font:600 11px/1.2 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:#9aa0b8}
+.valor .preco{font:700 25px/1 Syne,sans-serif}
+.valor .preco small{font-size:13px;margin-right:2px;color:#9aa0b8}
+.valor .desc{font-size:12px;line-height:1.3;color:#a0a6bb;min-height:2.6em;display:flex;align-items:center}
+.valor[aria-pressed="true"]{border-color:var(--loomb-claro);background:linear-gradient(180deg,rgba(9,146,104,.26),rgba(9,146,104,.07))}
+.valor[aria-pressed="true"] .nome{color:var(--loomb-claro)}
+.valor[aria-pressed="true"] .desc{color:#cfeee2}
+.valor[aria-pressed="true"]::after{content:"";position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;box-shadow:0 0 0 3px var(--sup);background:var(--loomb-claro) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.2l2.2 2.2 4.8-4.8' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat}
+.outro-valor{display:block;margin:10px auto 0;min-height:44px;background:none;border:0;color:var(--loomb-claro);font:500 15px "IBM Plex Sans",sans-serif;cursor:pointer;padding:6px 10px;text-decoration:underline;text-underline-offset:3px}
+.outro-valor[aria-pressed="true"]{color:var(--texto);text-decoration-color:var(--loomb-claro)}
+.pagar{margin-top:12px;padding-top:16px;border-top:1px solid var(--linha);display:grid;gap:14px;justify-items:center}
+.pagar[hidden]{display:none}
+.pagar>.falta{width:100%;justify-self:stretch}
+.qr{width:172px;height:172px;background:#fff;border-radius:14px;padding:9px;display:flex;align-items:center;justify-content:center}
+.qr img{width:100%;height:100%;image-rendering:pixelated}
+.qr .qr-espera{font:500 12px/1.3 "IBM Plex Mono",monospace;color:#1d2340;text-align:center}
+.copia{width:100%;display:grid;gap:10px}
+.copia .nota{margin:0;text-align:center}
+.copia code{display:block;font:12px/1.4 "IBM Plex Mono",monospace;color:#a3a9c0;background:var(--vazio);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;max-height:62px;overflow:hidden;word-break:break-all;user-select:all;-webkit-user-select:all}
+.copia button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;font:600 16px "IBM Plex Sans",sans-serif;color:#fff;background:var(--loomb-btn);border:0;border-radius:12px;padding:12px;cursor:pointer}
+.copia button:hover{background:var(--loomb)}
+.chapeu-zero{margin:14px 0 0;padding:14px 16px;border-radius:14px;background:rgba(9,146,104,.1);border:1px solid rgba(11,170,122,.4);color:var(--texto);text-align:center;font-size:15.5px;line-height:1.5}
+.chapeu-zero[hidden]{display:none}
+.chapeu-nota{margin:12px 0 0!important;text-align:center;font-size:13px!important}
+@media (min-width:560px){.pagar{grid-template-columns:172px 1fr;align-items:center;justify-items:stretch}.pagar>.falta{grid-column:1 / -1}.copia .nota{text-align:left}}
+.no-ticket{margin-top:14px!important}
+
+/* quem faz */
+.rostos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:6px 0 16px}
+.rosto{margin:0;text-align:center;background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:16px;padding:16px 10px}
+.rosto .foto{width:112px;height:112px;margin:0 auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--linha2);background:var(--vazio)}
+.rosto .foto img{width:100%;height:100%;object-fit:cover}
+.rosto .foto.falta{border:1.5px dashed var(--falta);padding:8px;font-size:10.5px;line-height:1.3}
+.rosto .foto.falta::before{content:attr(data-falta)}
+.rosto b{display:block;font:700 16px Syne,sans-serif}
+.rosto span{display:block;font-size:13px;line-height:1.4;color:#a0a6bb;margin-top:3px}
+.btn-zap{border-color:rgba(11,170,122,.6)}
+.btn-zap.falta{border-style:dashed}
+.como-feito{margin-top:22px;background:rgba(12,14,24,.92);border:1px solid var(--linha);border-radius:14px}
+.como-feito summary{cursor:pointer;padding:14px 16px;min-height:48px;color:#b9bfd4;font-size:15px;list-style:none}
+.como-feito summary::-webkit-details-marker{display:none}
+.como-feito summary::after{content:" +";color:var(--loomb-claro)}
+.como-feito[open] summary::after{content:" ×"}
+.como-feito .dentro{padding:0 16px 14px}
+.como-feito .dentro p{font-size:15.5px}
+.transparencia{margin:4px 0 0}
+.transparencia ul{margin:8px 0 0;padding-left:20px;color:var(--corpo)}
+
+/* a folha do chapéu (abre no topo) */
+dialog.folha{border:0;padding:0;background:transparent;color:var(--texto);max-width:540px;width:100%;margin:auto auto 0;max-height:94vh;overflow:visible}
+dialog.folha::backdrop{background:rgba(3,4,10,.74)}
+.folha .dentro{background:var(--sup);border:1px solid var(--linha2);border-bottom:0;border-radius:22px 22px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:94vh;overflow:auto;overscroll-behavior:contain}
+.folha header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.folha h2{flex:1;margin:0;font:700 23px Syne,sans-serif}
+.folha .fechar{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--linha2);background:transparent;color:var(--texto);font-size:24px;line-height:1;cursor:pointer}
+.folha .dentro>p{color:var(--corpo);font-size:15.5px;margin:0 0 14px}
+.folha .folha-pe{margin:14px 0 0;text-align:center}
+@media (min-width:600px){dialog.folha{margin:auto}.folha .dentro{border-radius:22px;border-bottom:1px solid var(--linha2);padding:20px 22px 22px}}
+
+/* andrômeda: novidades */
+.novidades{padding:0}
+.novidades summary{list-style:none;display:flex;align-items:center;gap:12px;padding:16px 18px;min-height:48px;cursor:pointer}
+.novidades summary::-webkit-details-marker{display:none}
+.novidades summary .t{flex:1;font-weight:600;color:var(--texto)}
+.novidades summary small{display:block;font-weight:400;font-size:14px;color:#a0a6bb;margin-top:2px}
+.novidades .mais{flex:none;font:28px/1 VT323,monospace;color:var(--loomb-claro);transition:transform .2s}
+.novidades[open] .mais{transform:rotate(45deg)}
+.form{display:grid;gap:12px;padding:0 18px 18px}
+.form>.nota{margin:0}
+.form label{display:grid;gap:6px;font-size:14.5px;color:var(--corpo)}
+.form .opcional{color:var(--apagado);font-size:13px}
+.form input[type=text],.form input[type=email],.form select{font:16px "IBM Plex Sans",sans-serif;color:var(--texto);background:var(--vazio);border:1px solid var(--linha2);border-radius:12px;padding:12px 14px;width:100%;min-height:46px;appearance:none}
+.form select{background-image:linear-gradient(45deg,transparent 50%,var(--apagado) 50%),linear-gradient(135deg,var(--apagado) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.form .aceite{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:#a0a6bb}
+.form .aceite input{flex:none;margin:2px 0 0;width:20px;height:20px;accent-color:var(--loomb)}
+.form button{font:600 16px "IBM Plex Sans",sans-serif;color:#fff;background:var(--loomb-btn);border:0;border-radius:12px;padding:14px;min-height:48px;cursor:pointer}
+.form button:hover{background:var(--loomb)}
+.form button[disabled]{opacity:.6;cursor:default}
+.form .isca{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.form-msg{margin:0;text-align:center}
+.form-msg:empty{display:none}
+
+/* a borda e o fim */
+.ultima-missao{margin:22px 0;padding:22px 20px;border-radius:18px;background:linear-gradient(180deg,rgba(9,146,104,.18),rgba(12,14,24,.94));border:1px solid rgba(11,170,122,.45)}
+.ultima-missao blockquote{margin:0}
+.ultima-missao p{font:700 clamp(20px,5.4vw,26px)/1.35 Syne,sans-serif;color:var(--texto);margin:0;text-shadow:none}
+.ultima-missao figcaption{margin-top:10px;font:500 12.5px "IBM Plex Mono",monospace;color:#9aa0b8}
+.botoes-fim .btn-jogar{flex:1 1 220px}
+.botoes-fim .btn-sec{flex:1 1 200px;justify-content:center}
+.rodape{position:relative;z-index:1;text-align:center;padding:64px var(--lado) calc(44px + env(safe-area-inset-bottom,0px));color:#a0a6bb;font-size:14px}
+.rodape p{margin:0}
+.marca-loomb{display:inline-flex;align-items:center;gap:10px;margin-top:16px;min-height:44px;color:var(--loomb-claro);text-decoration:none}
+.marca-loomb span{font:700 13px Syne,sans-serif;letter-spacing:.32em;margin-right:-.32em}
+
+/* ---------- computador ---------- */
+@media (min-width:900px){
+  :root{--hud:48px;--lado:32px;--vao:36vh}
+  .hud-rotulo,.hud-num{font-size:23px}
+  .topo{align-items:flex-start;text-align:left;padding:calc(var(--hud) + var(--topo-seguro) + 8vh) var(--margem) 120px var(--margem)}
+  .topo::before{left:0;width:64%;height:76%;transform:none;background:radial-gradient(60% 55% at 38% 50%,rgba(5,6,15,.55),rgba(5,6,15,.2) 62%,transparent 100%)}
+  .topo-texto{align-items:flex-start;max-width:620px}
+  .marca-pixel{width:432px;height:84px;margin:0}
+  .sub-pixel{width:272px;height:24px;margin:14px 0 0}
+  .lema{font-size:19px;max-width:28em;margin:22px 0 0;text-wrap:pretty}
+  .acoes{display:flex;flex-wrap:wrap;max-width:none;margin:30px 0 0;gap:12px}
+  .acoes .btn{white-space:nowrap;padding:12px 22px}
+  .celular{max-width:560px;margin:8px 0 0}
+  .celular>summary{justify-content:flex-start}
+  .zeros{justify-content:flex-start;font-size:14px;margin-top:10px}
+  .ficha,.kdok-caixa{max-width:480px}
+  :where(.parada) h3{font-size:22px}
+}
+@media (min-width:1000px){
+  .topo{display:grid;grid-template-columns:minmax(0,620px) 332px;justify-content:space-between;align-items:start;column-gap:40px}
+  .janela{display:block;width:332px;margin-top:6px;background:var(--preto);border:3px solid var(--moldura);border-radius:8px;padding:0 0 12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+}
+/* tela grande: a janela do jogo em 3x */
+@media (min-width:1600px) and (min-height:1000px){
+  .topo{grid-template-columns:minmax(0,620px) 492px}
+  .janela{width:492px}
+  .janela-tela img{width:480px;height:432px}
+  .janela-texto{font-size:25px}
+}
+@media (max-height:720px) and (max-width:899px){
+  .topo{padding-top:calc(var(--hud) + var(--topo-seguro) + 12px)}
+  .rotulo{margin-bottom:8px}
+  .marca-pixel{width:216px;height:42px}
+  .sub-pixel{width:136px;height:12px}
+  .lema{font-size:15px;margin-top:10px}
+  .acoes{margin-top:14px}
+  .btn{min-height:48px}
+  .btn-jogar{min-height:52px}
+  .zeros{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+
+/* ---------- impressão: só a folha das missões de verdade ---------- */
+.para-imprimir{display:none}
+@media print{
+  @page{size:A4;margin:11mm 12mm}
+  :root{color-scheme:light}
+  html,body{background:#fff!important;color:#111!important;overflow:visible!important}
+  .imp-topo>div{flex:1;min-width:0}
+  body>*:not(.para-imprimir){display:none!important}
+  .para-imprimir{display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .imp{font:9.5pt/1.38 "IBM Plex Sans",Arial,sans-serif;color:#111}
+  .imp-topo{display:flex;align-items:flex-end;justify-content:space-between;gap:14pt;border-bottom:2pt solid #111;padding-bottom:8pt;margin-bottom:8pt}
+  .imp-topo .marca-pixel{width:216px;height:42px;margin:0}
+  .imp h1{font:700 21pt/1.05 Syne,Arial,sans-serif;margin:8pt 0 3pt;color:#111}
+  .imp-sub{margin:0;font-size:10pt;color:#333}
+  .imp-cadete{flex:none;font:600 10pt "IBM Plex Mono",monospace;color:#111;padding-bottom:2pt}
+  .imp ol{list-style:none;margin:0;padding:0;columns:2;column-gap:9mm}
+  .imp li{break-inside:avoid;display:grid;grid-template-columns:15pt 1fr;gap:7pt;padding:5pt 0 6pt;border-bottom:.6pt solid #bbb}
+  .imp .quadro{width:12pt;height:12pt;border:1.4pt solid #111;border-radius:2pt;margin-top:1pt}
+  .imp li b{display:block;font:700 8pt/1.3 "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:#111;margin-bottom:1pt}
+  .imp li.ultima b{color:#087a57}
+  .imp-pe{margin-top:9pt;padding-top:6pt;border-top:.6pt solid #bbb;font-size:8pt;color:#555;display:flex;justify-content:space-between;gap:12pt}
+}

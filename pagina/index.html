@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Astrokdok · viagens espaciais</title>
+<meta name="description" content="Jogo educativo para crianças de 8 a 12 anos. A criança entra numa agência espacial no Vale do Capão, estuda na escola da vila e viaja da Lua até a borda do universo. Sem cadastro, sem anúncio e sem coleta de dados.">
+<meta name="theme-color" content="#05060B">
+<meta name="color-scheme" content="dark">
+<!--
+  A página do Astrokdok (LOOMB, 05/11/2026). Rolar é subir: a viagem sai da base do Vale do Capão e vai até a borda do universo.
+  O que falta preencher fica em js/config.js e aparece na página com a borda tracejada âmbar.
+
+  [FALTA] A prévia do link (WhatsApp e redes). O WhatsApp lê só este HTML e precisa do endereço completo da imagem.
+  Quando a página tiver endereço final (enderecoFinal em js/config.js):
+    1. troque content="og.png" por content="<endereço final>og.png" nas duas linhas da imagem (og:image e twitter:image);
+    2. tire o comentário da linha og:url e ponha o endereço final nela.
+  O pagina.js já faz essa troca no navegador, mas quem monta a prévia não roda o JavaScript.
+-->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Astrokdok">
+<meta property="og:title" content="Astrokdok · viagens espaciais">
+<meta property="og:description" content="Jogo educativo para crianças de 8 a 12 anos, feito no Vale do Capão. Da Lua até a borda do universo, com aulas curtas antes de cada viagem.">
+<meta property="og:image" content="https://jeandsprestes.github.io/astrokdok/pagina/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A marca ASTROKDOK em pixel sobre o amanhecer na base do Vale do Capão, com a nave na plataforma.">
+<meta property="og:url" content="https://jeandsprestes.github.io/astrokdok/pagina/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Astrokdok · viagens espaciais">
+<meta name="twitter:description" content="Jogo educativo para crianças de 8 a 12 anos, feito no Vale do Capão. Da Lua até a borda do universo.">
+<meta name="twitter:image" content="https://jeandsprestes.github.io/astrokdok/pagina/og.png">
+<link rel="icon" href="img/icone-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="img/icone-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@700;800&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/pagina.css">
+<link rel="stylesheet" href="css/missoes.css">
+<link rel="stylesheet" href="css/lua.css">
+<script src="js/config.js" defer></script>
+<script src="js/dados.js" defer></script>
+<script src="js/pagina.js" defer></script>
+<script src="js/viagem.js" defer></script>
+<script src="js/ceu.js" defer></script>
+<script src="js/lua.js" defer></script>
+<script src="js/missoes.js" defer></script>
+</head>
+<body>
+<a class="pular-conteudo" href="#t-orbita">Pular a subida e ir para o conteúdo</a>
+
+<!-- O céu: um canvas fixo, em pixel, atrás de tudo (js/viagem.js) -->
+<div class="ceu" aria-hidden="true"><canvas id="ceu"></canvas></div>
+
+<!-- O painel de bordo: a barra do jogo, com o medidor da viagem e o relógio da luz -->
+<header class="hud" id="hud">
+  <div class="hud-linha">
+    <canvas class="hud-nave pix" id="hud-nave" width="16" height="16" aria-hidden="true"></canvas>
+    <span class="hud-rotulo" id="hud-rotulo">BASE ASTROKDOK</span>
+    <span class="hud-num" id="hud-num">ALT 0 KM</span>
+    <button class="hud-botao hud-pular" id="hud-pular" type="button" hidden>PULAR</button>
+    <a class="hud-botao hud-jogar" id="hud-jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo hidden>JOGAR</a>
+  </div>
+  <div class="hud-luz" id="hud-luz"></div>
+  <div class="hud-aviso" id="hud-aviso" role="status" aria-live="polite"></div>
+</header>
+
+<!-- A régua das paradas (computador) -->
+<nav class="regua" id="regua" aria-label="Paradas da viagem"><ol id="regua-lista"></ol><canvas class="regua-nave pix" id="regua-nave" width="16" height="16" aria-hidden="true"></canvas></nav>
+
+<main id="conteudo">
+  <!-- BASE ASTROKDOK · 0 km -->
+  <header class="topo" id="base">
+    <div class="topo-texto">
+      <p class="rotulo">Jogo educativo · Vale do Capão</p>
+      <h1><svg class="marca-pixel" viewBox="0 0 72 14" width="72" height="14" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><path fill="#0e0e0e" d="M3 0h2v1h-2zM11 0h4v1h-4zM17 0h6v1h-6zM25 0h4v1h-4zM35 0h2v1h-2zM41 0h2v1h-2zM45 0h2v1h-2zM49 0h4v1h-4zM59 0h2v1h-2zM65 0h2v1h-2zM69 0h2v1h-2zM2 1h1v1h-1zM5 1h1v1h-1zM10 1h1v1h-1zM15 1h2v1h-2zM23 1h2v1h-2zM29 1h1v1h-1zM34 1h1v1h-1zM37 1h1v1h-1zM40 1h1v1h-1zM43 1h2v1h-2zM47 1h2v1h-2zM53 1h1v1h-1zM58 1h1v1h-1zM61 1h1v1h-1zM64 1h1v1h-1zM67 1h2v1h-2zM71 1h1v1h-1zM1 2h2v1h-2zM5 2h2v1h-2zM9 2h2v1h-2zM15 2h2v1h-2zM23 2h2v1h-2zM29 2h2v1h-2zM33 2h2v1h-2zM37 2h2v1h-2zM40 2h1v1h-1zM43 2h2v1h-2zM47 2h2v1h-2zM53 2h2v1h-2zM57 2h2v1h-2zM61 2h2v1h-2zM64 2h1v1h-1zM67 2h2v1h-2zM71 2h1v1h-1zM0 3h1v1h-1zM7 3h2v1h-2zM15 3h2v1h-2zM23 3h2v1h-2zM31 3h2v1h-2zM39 3h2v1h-2zM43 3h2v1h-2zM47 3h2v1h-2zM55 3h2v1h-2zM63 3h2v1h-2zM67 3h2v1h-2zM71 3h1v1h-1zM0 4h1v1h-1zM7 4h2v1h-2zM15 4h2v1h-2zM23 4h2v1h-2zM31 4h2v1h-2zM39 4h2v1h-2zM43 4h2v1h-2zM47 4h2v1h-2zM55 4h2v1h-2zM63 4h2v1h-2zM67 4h2v1h-2zM71 4h1v1h-1zM0 5h1v1h-1zM7 5h2v1h-2zM13 5h2v1h-2zM17 5h2v1h-2zM21 5h2v1h-2zM24 5h1v1h-1zM31 5h2v1h-2zM35 5h2v1h-2zM39 5h2v1h-2zM47 5h2v1h-2zM51 5h2v1h-2zM55 5h2v1h-2zM59 5h2v1h-2zM63 5h2v1h-2zM71 5h1v1h-1zM0 6h1v1h-1zM7 6h2v1h-2zM13 6h2v1h-2zM18 6h1v1h-1zM21 6h1v1h-1zM24 6h1v1h-1zM31 6h2v1h-2zM35 6h2v1h-2zM39 6h2v1h-2zM47 6h2v1h-2zM51 6h2v1h-2zM55 6h2v1h-2zM59 6h2v1h-2zM63 6h2v1h-2zM71 6h1v1h-1zM0 7h1v1h-1zM7 7h1v1h-1zM9 7h2v1h-2zM15 7h1v1h-1zM18 7h1v1h-1zM21 7h1v1h-1zM24 7h1v1h-1zM31 7h2v1h-2zM35 7h2v1h-2zM39 7h2v1h-2zM47 7h2v1h-2zM51 7h2v1h-2zM55 7h2v1h-2zM59 7h2v1h-2zM63 7h2v1h-2zM71 7h1v1h-1zM0 8h1v1h-1zM7 8h1v1h-1zM9 8h2v1h-2zM15 8h1v1h-1zM18 8h1v1h-1zM21 8h1v1h-1zM24 8h1v1h-1zM31 8h2v1h-2zM35 8h2v1h-2zM39 8h2v1h-2zM47 8h2v1h-2zM51 8h2v1h-2zM55 8h2v1h-2zM59 8h2v1h-2zM63 8h2v1h-2zM71 8h1v1h-1zM0 9h1v1h-1zM3 9h2v1h-2zM7 9h2v1h-2zM15 9h1v1h-1zM18 9h1v1h-1zM21 9h1v1h-1zM24 9h1v1h-1zM27 9h2v1h-2zM31 9h2v1h-2zM39 9h2v1h-2zM43 9h2v1h-2zM47 9h2v1h-2zM55 9h2v1h-2zM63 9h2v1h-2zM67 9h2v1h-2zM71 9h1v1h-1zM0 10h1v1h-1zM3 10h2v1h-2zM7 10h2v1h-2zM15 10h1v1h-1zM18 10h1v1h-1zM21 10h1v1h-1zM24 10h1v1h-1zM27 10h2v1h-2zM31 10h2v1h-2zM39 10h2v1h-2zM43 10h2v1h-2zM47 10h2v1h-2zM55 10h2v1h-2zM63 10h2v1h-2zM67 10h2v1h-2zM71 10h1v1h-1zM0 11h1v1h-1zM3 11h2v1h-2zM7 11h2v1h-2zM13 11h2v1h-2zM18 11h1v1h-1zM21 11h1v1h-1zM24 11h1v1h-1zM27 11h2v1h-2zM31 11h1v1h-1zM33 11h2v1h-2zM37 11h2v1h-2zM40 11h1v1h-1zM43 11h2v1h-2zM47 11h2v1h-2zM53 11h2v1h-2zM57 11h2v1h-2zM61 11h2v1h-2zM64 11h1v1h-1zM67 11h2v1h-2zM71 11h1v1h-1zM0 12h1v1h-1zM3 12h2v1h-2zM7 12h2v1h-2zM13 12h1v1h-1zM18 12h1v1h-1zM21 12h1v1h-1zM24 12h1v1h-1zM27 12h2v1h-2zM31 12h1v1h-1zM34 12h1v1h-1zM37 12h1v1h-1zM40 12h1v1h-1zM43 12h2v1h-2zM47 12h2v1h-2zM53 12h1v1h-1zM58 12h1v1h-1zM61 12h1v1h-1zM64 12h1v1h-1zM67 12h2v1h-2zM71 12h1v1h-1zM1 13h2v1h-2zM5 13h2v1h-2zM9 13h4v1h-4zM19 13h2v1h-2zM25 13h2v1h-2zM29 13h2v1h-2zM35 13h2v1h-2zM41 13h2v1h-2zM45 13h2v1h-2zM49 13h4v1h-4zM59 13h2v1h-2zM65 13h2v1h-2zM69 13h2v1h-2z"/><path fill="#6b5200" d="M3 3h2v1h-2zM11 3h4v1h-4zM17 3h2v1h-2zM21 3h2v1h-2zM27 3h2v1h-2zM35 3h2v1h-2zM51 3h2v1h-2zM59 3h2v1h-2zM3 4h2v1h-2zM11 4h4v1h-4zM17 4h2v1h-2zM21 4h2v1h-2zM27 4h2v1h-2zM35 4h2v1h-2zM51 4h2v1h-2zM59 4h2v1h-2zM9 5h2v1h-2zM29 5h2v1h-2zM45 5h2v1h-2zM69 5h2v1h-2zM9 6h2v1h-2zM29 6h2v1h-2zM45 6h2v1h-2zM69 6h2v1h-2zM3 7h2v1h-2zM11 7h2v1h-2zM27 7h2v1h-2zM43 7h2v1h-2zM67 7h2v1h-2zM3 8h2v1h-2zM11 8h2v1h-2zM27 8h2v1h-2zM43 8h2v1h-2zM67 8h2v1h-2zM13 9h2v1h-2zM33 9h2v1h-2zM37 9h2v1h-2zM53 9h2v1h-2zM57 9h2v1h-2zM61 9h2v1h-2zM13 10h2v1h-2zM33 10h2v1h-2zM37 10h2v1h-2zM53 10h2v1h-2zM57 10h2v1h-2zM61 10h2v1h-2zM1 11h2v1h-2zM5 11h2v1h-2zM9 11h4v1h-4zM19 11h2v1h-2zM25 11h2v1h-2zM29 11h2v1h-2zM35 11h2v1h-2zM41 11h2v1h-2zM45 11h2v1h-2zM49 11h4v1h-4zM59 11h2v1h-2zM65 11h2v1h-2zM69 11h2v1h-2zM1 12h2v1h-2zM5 12h2v1h-2zM9 12h4v1h-4zM19 12h2v1h-2zM25 12h2v1h-2zM29 12h2v1h-2zM35 12h2v1h-2zM41 12h2v1h-2zM45 12h2v1h-2zM49 12h4v1h-4zM59 12h2v1h-2zM65 12h2v1h-2zM69 12h2v1h-2z"/><path fill="#f2c200" d="M3 2h2v1h-2zM11 2h4v1h-4zM17 2h6v1h-6zM25 2h4v1h-4zM35 2h2v1h-2zM41 2h2v1h-2zM45 2h2v1h-2zM49 2h4v1h-4zM59 2h2v1h-2zM65 2h2v1h-2zM69 2h2v1h-2zM19 3h2v1h-2zM25 3h2v1h-2zM41 3h2v1h-2zM45 3h2v1h-2zM49 3h2v1h-2zM65 3h2v1h-2zM69 3h2v1h-2zM1 4h2v1h-2zM5 4h2v1h-2zM9 4h2v1h-2zM19 4h2v1h-2zM25 4h2v1h-2zM29 4h2v1h-2zM33 4h2v1h-2zM37 4h2v1h-2zM41 4h2v1h-2zM45 4h2v1h-2zM49 4h2v1h-2zM53 4h2v1h-2zM57 4h2v1h-2zM61 4h2v1h-2zM65 4h2v1h-2zM69 4h2v1h-2zM1 5h2v1h-2zM5 5h2v1h-2zM19 5h2v1h-2zM25 5h2v1h-2zM33 5h2v1h-2zM37 5h2v1h-2zM41 5h2v1h-2zM49 5h2v1h-2zM53 5h2v1h-2zM57 5h2v1h-2zM61 5h2v1h-2zM65 5h2v1h-2zM1 6h6v1h-6zM11 6h2v1h-2zM19 6h2v1h-2zM25 6h4v1h-4zM33 6h2v1h-2zM37 6h2v1h-2zM41 6h4v1h-4zM49 6h2v1h-2zM53 6h2v1h-2zM57 6h2v1h-2zM61 6h2v1h-2zM65 6h4v1h-4zM1 7h2v1h-2zM5 7h2v1h-2zM19 7h2v1h-2zM25 7h2v1h-2zM33 7h2v1h-2zM37 7h2v1h-2zM41 7h2v1h-2zM49 7h2v1h-2zM53 7h2v1h-2zM57 7h2v1h-2zM61 7h2v1h-2zM65 7h2v1h-2zM1 8h2v1h-2zM5 8h2v1h-2zM13 8h2v1h-2zM19 8h2v1h-2zM25 8h2v1h-2zM29 8h2v1h-2zM33 8h2v1h-2zM37 8h2v1h-2zM41 8h2v1h-2zM45 8h2v1h-2zM49 8h2v1h-2zM53 8h2v1h-2zM57 8h2v1h-2zM61 8h2v1h-2zM65 8h2v1h-2zM69 8h2v1h-2zM1 9h2v1h-2zM5 9h2v1h-2zM19 9h2v1h-2zM25 9h2v1h-2zM29 9h2v1h-2zM41 9h2v1h-2zM45 9h2v1h-2zM49 9h2v1h-2zM65 9h2v1h-2zM69 9h2v1h-2zM1 10h2v1h-2zM5 10h2v1h-2zM9 10h4v1h-4zM19 10h2v1h-2zM25 10h2v1h-2zM29 10h2v1h-2zM35 10h2v1h-2zM41 10h2v1h-2zM45 10h2v1h-2zM49 10h4v1h-4zM59 10h2v1h-2zM65 10h2v1h-2zM69 10h2v1h-2z"/><path fill="#fff4c0" d="M3 1h2v1h-2zM11 1h4v1h-4zM17 1h6v1h-6zM25 1h4v1h-4zM35 1h2v1h-2zM41 1h2v1h-2zM45 1h2v1h-2zM49 1h4v1h-4zM59 1h2v1h-2zM65 1h2v1h-2zM69 1h2v1h-2zM1 3h2v1h-2zM5 3h2v1h-2zM9 3h2v1h-2zM29 3h2v1h-2zM33 3h2v1h-2zM37 3h2v1h-2zM53 3h2v1h-2zM57 3h2v1h-2zM61 3h2v1h-2zM3 5h2v1h-2zM11 5h2v1h-2zM27 5h2v1h-2zM43 5h2v1h-2zM67 5h2v1h-2zM13 7h2v1h-2zM29 7h2v1h-2zM45 7h2v1h-2zM69 7h2v1h-2zM9 9h4v1h-4zM35 9h2v1h-2zM51 9h2v1h-2zM59 9h2v1h-2z"/></svg><span class="so-leitor">Astrokdok</span></h1>
+      <svg class="sub-pixel" viewBox="0 0 68 6" width="68" height="6" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><path fill="#0e0e0e" d="M1 1h1v1h-1zM3 1h1v1h-1zM6 1h2v1h-2zM14 1h2v1h-2zM17 1h3v1h-3zM21 1h1v1h-1zM26 1h2v1h-2zM33 1h3v1h-3zM38 1h2v1h-2zM41 1h1v1h-1zM50 1h2v1h-2zM54 1h2v1h-2zM62 1h2v1h-2zM66 1h2v1h-2zM1 2h1v1h-1zM3 2h1v1h-1zM6 2h1v1h-1zM11 2h1v1h-1zM13 2h1v1h-1zM21 2h1v1h-1zM23 2h1v1h-1zM43 2h1v1h-1zM47 2h1v1h-1zM49 2h1v1h-1zM54 2h1v1h-1zM59 2h1v1h-1zM62 2h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM9 3h1v1h-1zM11 3h1v1h-1zM13 3h1v1h-1zM15 3h1v1h-1zM17 3h2v1h-2zM21 3h1v1h-1zM23 3h1v1h-1zM33 3h2v1h-2zM41 3h2v1h-2zM45 3h1v1h-1zM47 3h1v1h-1zM49 3h1v1h-1zM54 3h1v1h-1zM57 3h1v1h-1zM59 3h1v1h-1zM62 3h1v1h-1zM3 4h1v1h-1zM9 4h1v1h-1zM11 4h1v1h-1zM15 4h1v1h-1zM21 4h1v1h-1zM23 4h1v1h-1zM27 4h1v1h-1zM39 4h1v1h-1zM41 4h1v1h-1zM45 4h1v1h-1zM47 4h1v1h-1zM57 4h1v1h-1zM59 4h1v1h-1zM67 4h1v1h-1zM2 5h1v1h-1zM5 5h3v1h-3zM9 5h1v1h-1zM11 5h1v1h-1zM14 5h2v1h-2zM17 5h3v1h-3zM21 5h1v1h-1zM23 5h1v1h-1zM25 5h2v1h-2zM33 5h3v1h-3zM37 5h2v1h-2zM41 5h1v1h-1zM45 5h1v1h-1zM47 5h1v1h-1zM50 5h2v1h-2zM53 5h3v1h-3zM57 5h1v1h-1zM59 5h1v1h-1zM61 5h3v1h-3zM65 5h2v1h-2z"/><path fill="#ffffff" d="M0 0h1v1h-1zM2 0h1v1h-1zM4 0h3v1h-3zM9 0h1v1h-1zM13 0h2v1h-2zM16 0h3v1h-3zM20 0h2v1h-2zM25 0h2v1h-2zM32 0h3v1h-3zM37 0h2v1h-2zM40 0h2v1h-2zM45 0h1v1h-1zM49 0h2v1h-2zM52 0h3v1h-3zM57 0h1v1h-1zM60 0h3v1h-3zM65 0h2v1h-2zM0 1h1v1h-1zM2 1h1v1h-1zM5 1h1v1h-1zM8 1h1v1h-1zM10 1h1v1h-1zM12 1h1v1h-1zM16 1h1v1h-1zM20 1h1v1h-1zM22 1h1v1h-1zM24 1h1v1h-1zM32 1h1v1h-1zM36 1h1v1h-1zM40 1h1v1h-1zM42 1h1v1h-1zM44 1h1v1h-1zM46 1h1v1h-1zM48 1h1v1h-1zM53 1h1v1h-1zM56 1h1v1h-1zM58 1h1v1h-1zM61 1h1v1h-1zM64 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM5 2h1v1h-1zM8 2h3v1h-3zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h2v1h-2zM20 2h1v1h-1zM22 2h1v1h-1zM25 2h1v1h-1zM32 2h2v1h-2zM37 2h1v1h-1zM40 2h2v1h-2zM44 2h3v1h-3zM48 2h1v1h-1zM53 2h1v1h-1zM56 2h3v1h-3zM61 2h1v1h-1zM65 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM5 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM16 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM26 3h1v1h-1zM32 3h1v1h-1zM38 3h1v1h-1zM40 3h1v1h-1zM44 3h1v1h-1zM46 3h1v1h-1zM48 3h1v1h-1zM53 3h1v1h-1zM56 3h1v1h-1zM58 3h1v1h-1zM61 3h1v1h-1zM66 3h1v1h-1zM1 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h1v1h-1zM13 4h2v1h-2zM16 4h3v1h-3zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h2v1h-2zM32 4h3v1h-3zM36 4h2v1h-2zM40 4h1v1h-1zM44 4h1v1h-1zM46 4h1v1h-1zM49 4h2v1h-2zM52 4h3v1h-3zM56 4h1v1h-1zM58 4h1v1h-1zM60 4h3v1h-3zM64 4h2v1h-2z"/></svg>
+      <p class="lema">A criança entra numa agência espacial no Vale do Capão, estuda na escola da vila e viaja da Lua até a borda do universo. Para crianças de 8 a 12 anos.</p>
+      <div class="acoes">
+        <a class="btn btn-jogar" id="jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo>
+          <svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
+        <button class="btn btn-chapeu" id="abrir-chapeu" type="button" aria-haspopup="dialog">
+          <svg width="24" height="18" viewBox="0 0 12 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M3 0h6v5H3zM0 7h12v2H0z"/><path fill="#f2c200" d="M3 5h6v2H3z"/></svg>Passar no chapéu digital</button>
+      </div>
+      <details class="celular" id="celular">
+        <summary><svg width="12" height="18" viewBox="0 0 6 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M0 0h6v9H0z"/><path fill="#05060f" d="M1 1h4v6H1z"/></svg>Pôr o jogo na tela do celular</summary>
+        <div class="celular-corpo">
+          <p class="celular-intro">Ponha o jogo na tela do celular. Assim ele abre com um toque, como um aplicativo, e o progresso fica guardado.</p>
+          <div class="abas" role="tablist" aria-label="Escolha o aparelho">
+            <button type="button" role="tab" id="aba-android" aria-controls="painel-android" data-aba="android" aria-selected="true">Android</button>
+            <button type="button" role="tab" id="aba-iphone" aria-controls="painel-iphone" data-aba="iphone" aria-selected="false" tabindex="-1">iPhone</button>
+            <button type="button" role="tab" id="aba-pc" aria-controls="painel-pc" data-aba="pc" aria-selected="false" tabindex="-1">Computador</button>
+          </div>
+          <div class="aba" id="painel-android" role="tabpanel" aria-labelledby="aba-android" data-aba="android">
+            <ol class="passo-a-passo">
+              <li>Abra o jogo no <b>Chrome</b>.</li>
+              <li>Toque nos três pontinhos <b>⋮</b>.</li>
+              <li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li>
+            </ol>
+          </div>
+          <div class="aba" id="painel-iphone" role="tabpanel" aria-labelledby="aba-iphone" data-aba="iphone" hidden>
+            <ol class="passo-a-passo">
+              <li>Abra o jogo no <b>Safari</b>.</li>
+              <li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima).</li>
+              <li>Toque em <b>Adicionar à Tela de Início</b>.</li>
+            </ol>
+            <p class="nota">No iPhone, com o jogo fora da tela de início, o Safari pode apagar o progresso depois de 7 dias sem abrir.</p>
+          </div>
+          <div class="aba aba-pc" id="painel-pc" role="tabpanel" aria-labelledby="aba-pc" data-aba="pc" hidden>
+            <div class="qr-jogo" id="qr-jogo" role="img" aria-label="Código QR que abre o jogo no celular"></div>
+            <p>Aponte a câmera do celular para o código: o jogo abre lá. Depois é só seguir o passo a passo do Android ou do iPhone. No computador ele também roda, com as setas e as teclas Z e X.</p>
+          </div>
+          <a class="btn-sec btn-abrir" href="https://jeandsprestes.github.io/astrokdok/" data-jogo>Abrir o jogo</a>
+        </div>
+      </details>
+      <ul class="zeros" aria-label="O que o jogo não tem"><li><b>zero</b> compra dentro do jogo</li><li><b>zero</b> anúncio</li><li><b>zero</b> coleta de dados</li></ul>
+    </div>
+
+    <!-- No computador: uma janela do jogo na metade direita, com as 18 bases de lançamento -->
+    <aside class="janela" id="janela" aria-label="As bases de lançamento do jogo">
+      <div class="janela-barra">
+        <button class="janela-seta" type="button" id="janela-ant" aria-label="Base anterior"><svg width="8" height="14" viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 0h1v7H3zM2 1h1v5H2zM1 2h1v3H1zM0 3h1v1H0z"/></svg></button>
+        <span class="janela-missao" id="janela-missao">MISSÃO 1 · TERRA</span>
+        <span class="janela-conta" id="janela-conta">1/18</span>
+        <button class="janela-seta" type="button" id="janela-prox" aria-label="Próxima base"><svg width="8" height="14" viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M0 0h1v7H0zM1 1h1v5H1zM2 2h1v3H2zM3 3h1v1H3z"/></svg></button>
+      </div>
+      <div class="janela-tela"><img class="pix" id="janela-img" src="img/jogo/base_01_capao.png" width="160" height="144" alt="A base de lançamento do Vale do Capão, como aparece no jogo" loading="lazy" decoding="async"></div>
+      <p class="caixa-jogo janela-texto" id="janela-texto" aria-live="polite"><span class="quem">KDOK:</span>A primeira base fica no Vale do Capão.</p>
+    </aside>
+
+    <div class="deixa" aria-hidden="true">ROLE PARA LANÇAR
+      <svg width="20" height="12" viewBox="0 0 5 3" shape-rendering="crispEdges"><path fill="#f2c200" d="M0 0h5v1H0zM1 1h3v1H1zM2 2h1v1H2z"/></svg></div>
+  </header>
+
+  <!-- A SUBIDA · de 0 a 400 km: a nave sobe com a rolagem, pelas camadas da aula da missão 1 -->
+  <section class="subida" id="subida" aria-label="A subida, da base até a órbita">
+    <div class="etapa etapa-curta" data-t="0">
+      <div class="ficha"><p class="ficha-t">MISSÃO 1 · TERRA</p><p>A primeira missão é subir até a órbita e fotografar a Terra. Esta subida é o minijogo dela.</p></div>
+    </div>
+    <div class="etapa etapa-curta" data-t="70">
+      <p class="caixa-jogo kdok-caixa"><span class="quem">KDOK:</span>Bip-bop! Vamos atravessar as camadas da atmosfera até a órbita!</p>
+    </div>
+    <div class="etapa" data-t="150">
+      <div class="ficha"><p class="ficha-t">ATÉ 12 KM</p><p>Nuvens, chuva e aviões. No jogo, aqui a criança desvia de passarinhos e de aviões com ◀ ▶.</p></div>
+    </div>
+    <div class="etapa" data-t="300">
+      <div class="ficha"><p class="ficha-t">ATÉ 50 KM</p><p>Aqui fica a camada de ozônio. E passam os balões.</p></div>
+    </div>
+    <div class="etapa" data-t="460">
+      <div class="ficha"><p class="ficha-t">ATÉ 80 KM</p><p>Os meteoros queimam aqui. A estrela cadente que a gente vê do quintal é um meteoro.</p></div>
+    </div>
+    <div class="etapa" data-t="620">
+      <div class="ficha"><p class="ficha-t">ATÉ 600 KM</p><p>A Estação Espacial voa a uns 400 km de altura e dá uma volta na Terra a cada 90 minutos.</p></div>
+    </div>
+    <div class="etapa etapa-orbita" data-t="780">
+      <p class="caixa-jogo kdok-caixa"><span class="quem">KDOK:</span>ÓRBITA ALCANÇADA! 400 km de altura. Estamos na termosfera, junto da Estação Espacial.<br>Aquela linha fininha brilhando na borda é a atmosfera. É ela que guarda o ar que a gente respira.</p>
+    </div>
+  </section>
+
+  <!-- ÓRBITA · 400 km: por que o jogo existe, o vídeo e como é uma missão -->
+  <section class="parada" id="orbita" data-parada="orbita" aria-labelledby="t-orbita">
+    <div class="placa"><span class="n" data-missao="TERRA">MISSÃO 1</span><span class="onde">TERRA, VISTA DA ÓRBITA</span><span class="dist">400 km de altura · a subida até aqui é o minijogo da primeira missão</span></div>
+    <h2 id="t-orbita">Por que eu fiz esse jogo</h2>
+    <div class="orbita-grade">
+      <figure class="fala">
+        <blockquote>
+          <p>“Uma professora do meu filho recomendou que ele fizesse mais atividades em casa. E eu, que já vinha fazendo alguns desenvolvimentos, pensei: será que eu não consigo eu mesmo produzir alguma coisa que eu considere saudável pra ele?”</p>
+          <p>“Quando envolve celular, quando envolve tela, a gente sabe que tem que ter um cuidado diferente.”</p>
+        </blockquote>
+        <figcaption>Jean, no vídeo do jogo</figcaption>
+      </figure>
+      <div class="video" id="video"></div>
+    </div>
+    <h3 class="passos-titulo">Como é uma missão</h3>
+    <p>Cada missão tem o mesmo ritmo, sem pressa.</p>
+    <ol class="passos">
+      <li class="passo"><div class="tela-jogo"><img class="pix" src="img/escola.png" width="160" height="144" alt="A sala de aula da Escola do Capão, no jogo" loading="lazy" decoding="async"></div>
+        <div><h4>A escola</h4><p>Uma aula curta de uma matéria da escola (português, matemática, inglês, ciências, geografia ou história), com pouco texto, o essencial, e desafios com dica.</p></div></li>
+      <li class="passo"><div class="tela-jogo tela-corpo"><img class="pix" src="img/jogo/corpo_saturno.png" width="141" height="86" alt="Saturno com os anéis, desenhado no jogo" loading="lazy" decoding="async"></div>
+        <div><h4>A astronomia</h4><p>Uma aula sobre o lugar da próxima viagem.</p></div></li>
+      <li class="passo"><div class="tela-jogo"><img class="pix" src="img/jogo/base_02_alcantara.png" width="160" height="144" alt="A base de lançamento de Alcântara, no Maranhão, com a guia do lugar, o cadete e o KDOK" loading="lazy" decoding="async"></div>
+        <div><h4>A base de lançamento</h4><p>Um guia apresenta a geografia e a história do lugar. Tirando a do Capão, todas as bases existem de verdade.</p></div></li>
+      <li class="passo"><div class="tela-jogo"><img class="pix" src="img/jogo/mini_02_lander.png" width="160" height="144" alt="O minijogo do pouso na Lua, com a nave descendo de motor ligado" loading="lazy" decoding="async"></div>
+        <div><h4>A viagem</h4><p>Cada missão tem um minijogo diferente. Pousar na Lua sem amassar a nave, dirigir um jipe-robô em Marte, devolver o gelo aos anéis de Saturno.</p></div></li>
+      <li class="passo"><div class="tela-jogo"><img class="pix" src="img/jogo/base_18_capao_noite.png" width="160" height="144" alt="O Vale do Capão de noite, com a Via Láctea no céu, como aparece no jogo" loading="lazy" decoding="async"></div>
+        <div><h4>Fora da tela</h4><p>No fim, uma tarefa no mundo de verdade. Olhar a Lua e desenhar a fase, fazer um relógio de sol com um palito, procurar o Cruzeiro do Sul.</p></div></li>
+    </ol>
+  </section>
+
+  <!-- LUA · 384.400 km: o caderno da Lua de hoje (módulo lua) -->
+  <section class="parada" id="lua" data-parada="lua" aria-labelledby="t-lua">
+    <div class="placa"><span class="n" data-missao="LUA">MISSÃO 2</span><span class="onde">LUA</span><span class="dist">384.400 km · a luz leva pouco mais de 1 segundo para vir de lá</span></div>
+    <h2 id="t-lua">O caderno da Lua</h2>
+    <div class="modulo" data-modulo="lua"><p class="reserva" data-reserva-real="2"></p></div>
+  </section>
+
+  <!-- SOL · 150 milhões de km: as missões de verdade, longe da tela -->
+  <section class="parada" id="sol" data-parada="sol" aria-labelledby="t-sol">
+    <div class="placa"><span class="n" data-missao="SOL">MISSÃO 3</span><span class="onde">SOL</span><span class="dist">uns 150 milhões de km da Terra · a luz do Sol leva 8 min e 20 s para chegar até nós</span></div>
+    <h2 id="t-sol">Missões de verdade, longe da tela</h2>
+    <p>Cada missão termina com uma tarefa no mundo de verdade. Estas são as <span data-total="tarefasForaDaTela">18</span>, com as palavras do jogo.</p>
+    <figure class="fala">
+      <blockquote><p>“Às vezes tem exercícios pra fazer fora, tipo medir uma sombra que o sol faz.”</p></blockquote>
+      <figcaption>Jean</figcaption>
+    </figure>
+    <ol class="lista-real" id="lista-real"></ol>
+    <div class="botoes-linha">
+      <button class="btn-sec" type="button" id="ver-todas" aria-expanded="false" aria-controls="lista-real">Ver as <span data-total="tarefasForaDaTela">18</span></button>
+      <button class="btn-sec" type="button" id="imprimir">
+        <svg width="18" height="16" viewBox="0 0 9 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#C9CDDC" d="M2 0h5v2H2zM0 2h9v4H0zM2 5h5v3H2z"/><path fill="#05060f" d="M3 6h3v1H3z"/><path fill="#0BAA7A" d="M7 3h1v1H7z"/></svg>Imprimir a lista para a geladeira</button>
+    </div>
+  </section>
+
+  <!-- DE MERCÚRIO A NETUNO: as naves e a sala das 18 missões (módulo missoes) -->
+  <section class="parada parada-larga" id="planetas" data-parada="planetas" aria-labelledby="t-planetas">
+    <div class="placa"><span class="n" data-missoes="MERCÚRIO NETUNO">MISSÕES 4 A 11</span><span class="onde">DE MERCÚRIO A NETUNO</span><span class="dist">distância até o Sol: Mercúrio, 57,9 milhões de km; Netuno, 4.515 milhões de km (NASA)</span></div>
+    <h2 id="t-planetas">As <span data-total="missoes">18</span> missões</h2>
+    <p class="intro-planetas">Da Terra à borda do universo. A base do Vale do Capão é inventada (é a da missão 1 e a da missão 18); as outras <span data-total="basesReais">16</span> existem de verdade, de Alcântara, no Maranhão, a Gizé, no Egito.</p>
+    <div class="naves-faixa">
+      <p>A nave ganha uma peça nova no fim de cada missão e, em cinco delas, muda de nome. A primeira nave é a CALHAMBEQUE-1, que, nas palavras do jogo, “é feia, mas voa. Quase sempre.”</p>
+      <ol class="naves" id="naves" aria-label="As naves do jogo, em ordem">
+        <li><img class="pix" src="img/jogo/nave_1_calhambeque_1.png" width="16" height="16" alt="" loading="lazy"><b>CALHAMBEQUE-1</b></li>
+        <li><img class="pix" src="img/jogo/nave_2_calhambeque_turbo.png" width="16" height="16" alt="" loading="lazy"><b>CALHAMBEQUE TURBO</b></li>
+        <li><img class="pix" src="img/jogo/nave_3_estrela_do_capao.png" width="16" height="16" alt="" loading="lazy"><b>ESTRELA DO CAPÃO</b></li>
+        <li><img class="pix" src="img/jogo/nave_4_nave_ionica.png" width="16" height="16" alt="" loading="lazy"><b>NAVE IÔNICA</b></li>
+        <li><img class="pix" src="img/jogo/nave_5_vela_laser.png" width="16" height="16" alt="" loading="lazy"><b>VELA-LASER</b></li>
+        <li><img class="pix" src="img/jogo/nave_6_dobra_1.png" width="16" height="16" alt="" loading="lazy"><b>DOBRA-1</b></li>
+      </ol>
+    </div>
+    <div class="modulo modulo-missoes" data-modulo="missoes"><ol class="reserva reserva-missoes" id="reserva-missoes"></ol></div>
+  </section>
+
+  <!-- PRÓXIMA CENTAURI · 4,2 anos-luz: o jogo num celular desenhado -->
+  <section class="parada" id="proxima" data-parada="proxima" aria-labelledby="t-proxima">
+    <div class="placa"><span class="n" data-missao="PRÓXIMA CENTAURI">MISSÃO 13</span><span class="onde">PRÓXIMA CENTAURI</span><span class="dist">4,2 anos-luz · uns 40 trilhões de km</span></div>
+    <h2 id="t-proxima">Dá para testar aqui mesmo</h2>
+    <div class="demo">
+      <div class="demo-texto">
+        <p>Estas são telas de verdade do jogo, num celular. Passe com as setas. Ele só carrega aqui quando você pedir.</p>
+        <p class="nota">Na tela do celular, o jogo tem setas e os botões A e B. No computador, use as setas e as teclas Z e X.</p>
+      </div>
+      <figure class="aparelho" id="aparelho">
+        <div class="aparelho-tela" id="aparelho-tela">
+          <img id="tela-img" src="img/telas/celular_aparencia.webp" width="1170" height="2532" alt="A tela de montar o cadete, com o cabelo, a pele e a roupa" loading="lazy" decoding="async">
+        </div>
+        <figcaption class="caixa-jogo tela-legenda" id="tela-legenda" aria-live="polite"><span class="quem">KDOK:</span><span id="tela-fala">Primeiro, a criança monta o cadete: cabelo, pele e roupa.</span></figcaption>
+        <div class="tela-controles" id="tela-controles">
+          <button class="seta" type="button" id="tela-ant" aria-label="Tela anterior"><svg width="8" height="14" viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 0h1v7H3zM2 1h1v5H2zM1 2h1v3H1zM0 3h1v1H0z"/></svg></button>
+          <span class="tela-conta" id="tela-conta">TELA 1/6</span>
+          <button class="seta" type="button" id="tela-prox" aria-label="Próxima tela"><svg width="8" height="14" viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M0 0h1v7H0zM1 1h1v5H1zM2 2h1v3H2zM3 3h1v1H3z"/></svg></button>
+        </div>
+      </figure>
+      <div class="demo-acoes">
+        <button class="btn btn-jogar" type="button" id="carregar-jogo">Carregar o jogo aqui</button>
+        <p class="nota">Fica melhor em tela cheia: <a href="https://jeandsprestes.github.io/astrokdok/" data-jogo>abrir o jogo</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAGITÁRIO A* · 26 mil anos-luz: o cuidado -->
+  <section class="parada" id="sgra" data-parada="sgra" aria-labelledby="t-sgra">
+    <div class="placa"><span class="n" data-missao="SAGITÁRIO A*">MISSÃO 15</span><span class="onde">SAGITÁRIO A*</span><span class="dist">26 mil anos-luz · o buraco negro do centro da galáxia</span></div>
+    <h2 id="t-sgra">Feito com pouco estímulo</h2>
+    <figure class="fala">
+      <blockquote><p>“Eu jogava aqueles joguinhos de Game Boy, que tinham um gráfico muito mais saudável, 8 bits, sem tanto estímulo.”</p></blockquote>
+      <figcaption>Jean</figcaption>
+    </figure>
+    <p class="zeros-frase">Zero compra dentro do jogo, zero anúncio, zero coleta de dados.</p>
+    <ul class="cuidados">
+      <li><b>Gráfico simples</b><span>Gráfico de 160 por 144 pixels, no estilo dos jogos antigos, e sem chuva de prêmios.</span></li>
+      <li><b>Sem cadastro</b><span>O progresso fica salvo só no aparelho.</span></li>
+      <li><b>Começo e fim</b><span>Cada missão fecha uma etapa: aula, viagem e uma tarefa de verdade.</span></li>
+      <li><b>Sem internet</b><span>Depois que abre pela primeira vez, ele funciona sem conexão.</span></li>
+      <li><b>Papel e lápis</b><span>Papel, lápis e borracha do lado: o próprio jogo pede.</span></li>
+      <li><b>Código aberto</b><span>Qualquer pessoa pode ver como o jogo foi feito. <a href="https://github.com/jeandsprestes/astrokdok" data-codigo>Ver no GitHub</a></span></li>
+    </ul>
+    <figure class="fala">
+      <blockquote>
+        <p>“Meu filho não trocaria um momento de jogar Minecraft pelo Astrokdok. E isso é uma coisa boa, porque não é pra trocar. O jogo cumpre a função dele, que é não viciar a criança em mais um aplicativo de tela.”</p>
+        <p>“É um bom direcionador de estudo. Em vez de tal coisa, hoje vamos estudar um pouco, e tem esse jogo aqui que direciona o estudo. Acaba sendo um pouco divertido.”</p>
+      </blockquote>
+      <figcaption>Jean</figcaption>
+    </figure>
+  </section>
+
+  <!-- NUVENS DE MAGALHÃES · 160 mil anos-luz: o chapéu digital, para onde vai e quem faz -->
+  <section class="parada" id="magalhaes" data-parada="magalhaes" aria-labelledby="t-chapeu">
+    <div class="placa"><span class="n" data-missao="MAGALHÃES">MISSÃO 16</span><span class="onde">NUVENS DE MAGALHÃES</span><span class="dist">Grande Nuvem a 160 mil anos-luz, Pequena a 200 mil · duas galáxias vizinhas da nossa</span></div>
+    <h2 id="t-chapeu">O chapéu digital</h2>
+    <p>Não ter preço não quer dizer que não tem valor, nem que não houve trabalho. O jogo me custou tempo, dinheiro e dedicação.</p>
+    <p>O justo depende de cada casa. Quem pode pagar um pouco mais paga, e assim financia o acesso de quem não pode. Se testou e não gostou, tudo certo: não deve nada.</p>
+    <figure class="fala">
+      <blockquote>
+        <p>“Se de repente ele consegue completar o jogo inteiro, que são 18 fases, eu vou sentir: então teve um valor para essa família.”</p>
+        <p>“Pode contribuir por você e por alguém que não pode contribuir, e vai poder jogar também.”</p>
+      </blockquote>
+      <figcaption>Jean</figcaption>
+    </figure>
+    <div class="cartao chapeu" id="chapeu-pagina"></div>
+    <p class="nota no-ticket">No marketing existe o <i>high ticket</i>, o preço alto, e o <i>low ticket</i>, o preço baixo. Eu brinco que o Astrokdok é <i>no ticket</i>: não tem preço.</p>
+
+    <h3>Para onde vai</h3>
+    <p>O que entra cobre o trabalho de quem faz o jogo, vira novos jogos e ferramentas abertas, e uma parte vai para projetos sociais do Vale do Capão, começando pela brigada de incêndio. Quanto entrou e para onde foi fica aberto aqui.</p>
+    <div id="transparencia"></div>
+
+    <h3>Quem faz</h3>
+    <div class="rostos">
+      <figure class="rosto"><div class="foto" id="foto-jean"></div><figcaption><b>Jean</b><span>do Vale do Capão, na Chapada Diamantina</span></figcaption></figure>
+      <figure class="rosto"><div class="foto foto-loomb"><svg width="64" height="64" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#099268" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="58 12" transform="rotate(-70 16 16)"/></svg></div><figcaption><b>LOOMB</b><span>o avatar digital do Jean</span></figcaption></figure>
+    </div>
+    <p>No digital, a gente não é a gente mesmo. Se quiser me conhecer de verdade, venha onde eu estou.</p>
+    <div class="botoes-linha"><a class="btn-sec btn-zap" id="falar-jean" href="#" target="_blank" rel="noopener">
+      <svg width="18" height="16" viewBox="0 0 9 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#0BAA7A" d="M1 0h7v1H1zM0 1h9v4H0zM1 5h7v1H1zM2 6h2v1H2zM2 7h1v1H2z"/><path fill="#05060f" d="M2 3h1v1H2zM4 3h1v1H4zM6 3h1v1H6z"/></svg>Falar com o Jean</a></div>
+    <details class="como-feito">
+      <summary>Como o jogo foi feito</summary>
+      <div class="dentro">
+        <p>As ideias nasceram no papel, comigo e com os palpites do meu filho, que testou as mecânicas. O conteúdo veio da internet, com ajuda de inteligência artificial para pesquisar e escrever o código, e com revisão humana o tempo todo.</p>
+        <p>Os <span data-total="desafios">292</span> desafios tiveram o gabarito conferido antes de entrar no jogo, e eu tive bastante cuidado com o conteúdo.</p>
+        <p>O código é aberto: qualquer pessoa pode ver como o jogo foi feito. <a href="https://github.com/jeandsprestes/astrokdok" data-codigo>Ver o código no GitHub</a>.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ANDRÔMEDA · 2,5 milhões de anos-luz: novidades por e-mail (opcional) -->
+  <section class="parada" id="andromeda" data-parada="andromeda" aria-labelledby="t-novidades">
+    <div class="placa"><span class="n" data-missao="ANDRÔMEDA">MISSÃO 17</span><span class="onde">ANDRÔMEDA</span><span class="dist">2,5 milhões de anos-luz · vem na nossa direção a uns 110 km por segundo</span></div>
+    <h2 id="t-novidades">Novidades, se você quiser</h2>
+    <details class="novidades cartao">
+      <summary><span class="t">Quero receber novidades do Astrokdok<small>Novas missões e atualizações, por e-mail</small></span><span class="mais" aria-hidden="true">+</span></summary>
+      <form class="form" id="novidades" novalidate>
+        <p class="nota">Só para adultos. Nada de propaganda de terceiros.</p>
+        <label><span>Seu nome <span class="opcional">(opcional)</span></span><input type="text" name="nome" autocomplete="name" maxlength="80"></label>
+        <label><span>Seu e-mail</span><input type="email" name="email" autocomplete="email" required maxlength="120"></label>
+        <label><span>Sua cidade <span class="opcional">(opcional)</span></span><input type="text" name="cidade" autocomplete="address-level2" maxlength="80"></label>
+        <label><span>Como conheceu o jogo? <span class="opcional">(opcional)</span></span>
+          <select name="origem"><option value="">Escolha</option><option>Grupo de WhatsApp</option><option>Indicação de alguém</option><option>Escola ou professor</option><option>Rede social</option><option>Outro</option></select></label>
+        <label class="aceite"><input type="checkbox" name="aceite" required><span>Aceito receber e-mails sobre o Astrokdok. Posso sair da lista quando quiser.</span></label>
+        <input class="isca" type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit">Quero receber</button>
+        <p class="nota form-msg" id="form-msg" aria-live="polite"></p>
+      </form>
+    </details>
+  </section>
+
+  <!-- A BORDA · 13,8 bilhões de anos: a última missão volta para o Capão -->
+  <section class="parada" id="borda" data-parada="borda" aria-labelledby="t-borda">
+    <div class="placa"><span class="n" data-missao="A BORDA">MISSÃO 18</span><span class="onde">A BORDA DO UNIVERSO OBSERVÁVEL</span><span class="dist">a luz mais antiga viajou uns 13,8 bilhões de anos até aqui</span></div>
+    <div class="portal"><img class="pix" src="img/jogo/corpo_radiacao_fundo.png" width="154" height="101" alt="O mapa da luz mais antiga do universo, como aparece no jogo" loading="lazy" decoding="async"></div>
+    <h2 id="t-borda">A missão 18 sai de casa</h2>
+    <p>A luz mais antiga que dá para ver saiu quando o universo tinha uns 380 mil anos. Ela foi descoberta sem querer, em 1964: dois cientistas ouviam um chiado na antena e acharam que era cocô de pombo.</p>
+    <p>A última missão sai do Vale do Capão, de noite, e vai até a borda. A medalha do jogo é para quem foi até lá e voltou para casa.</p>
+    <figure class="ultima-missao">
+      <blockquote><p id="real-final">“Última missão de verdade: numa noite escura, deite no chão com alguém de casa e olhe o céu por 10 minutos.”</p></blockquote>
+      <figcaption>No jogo, na missão 18</figcaption>
+    </figure>
+    <div class="botoes-linha botoes-fim">
+      <a class="btn btn-jogar" href="https://jeandsprestes.github.io/astrokdok/" data-jogo>
+        <svg width="14" height="16" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#fff" d="M0 0h2v8H0zM2 1h2v6H2zM4 2h2v4H4zM6 3h1v2H6z"/></svg>Jogar agora</a>
+      <button class="btn-sec" type="button" id="voltar-base">Voltar para a base</button>
+      <button class="btn-sec" type="button" id="mandar">Mandar para alguém</button>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>Feito no Vale do Capão, Chapada Diamantina. · <a href="https://github.com/jeandsprestes/astrokdok" data-codigo>Código aberto no GitHub</a></p>
+  <a class="marca-loomb" href="#base" aria-label="LOOMB. Voltar para o topo"><svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#099268" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="58 12" transform="rotate(-70 16 16)"/></svg><span>LOOMB</span></a>
+</footer>
+
+<!-- O chapéu, aberto pelo botão do topo (o mesmo componente da parada das Nuvens de Magalhães) -->
+<dialog class="folha" id="folha-chapeu" aria-labelledby="t-folha">
+  <div class="dentro">
+    <header><h2 id="t-folha">Chapéu digital</h2><button class="fechar" type="button" data-fechar aria-label="Fechar">×</button></header>
+    <p>Jogue e teste com calma. Se o jogo fizer sentido para a sua família, passe no chapéu.</p>
+    <div class="chapeu" id="chapeu-folha"></div>
+    <p class="nota folha-pe">Por que um chapéu: <a href="#magalhaes" data-fechar>lá embaixo, nas Nuvens de Magalhães</a>.</p>
+  </div>
+</dialog>
+
+<!-- A folha para imprimir (só aparece na impressão) -->
+<section class="para-imprimir" id="para-imprimir" aria-hidden="true"></section>
+</body>
+</html>
